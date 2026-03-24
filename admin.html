@@ -1,24 +1,860 @@
-￼
-Sphere Sign
-v2
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sphere Sign — ניהול</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --navy: #0D1B5E;
+    --navy-light: #1a2d7c;
+    --gold: #E8B829;
+    --gold-hover: #d4a520;
+    --bg: #f0f2f7;
+    --white: #ffffff;
+    --text: #1a1a2e;
+    --text-light: #6b7280;
+    --border: #e2e5ef;
+    --success: #059669;
+    --success-bg: #ecfdf5;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+    --radius: 10px;
+  }
 
-בודק חיבור...
-⚙️ הגדרות
-1 העלאת מסמך
-📄
-גרור PDF לכאן או לחץ לבחירה
-PDF בלבד, עד 10MB
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    min-height: 100vh;
+  }
 
-2 פרטים
-שם הלקוח
-סוג מסמך
-          סיכום שיחה
-          אישור תנאי חיתום
-          מסמך הלוואה מקופה
-          חוזה שכר טרחה
-          אחר
-        
-שם המסמך (כפי שיוצג ללקוח)
-3 שליחה 🔗 צור קישור חתימה
-📋 אחרונים
-אין מסמכים עדיין
+  /* === HEADER === */
+  .header {
+    background: var(--navy);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(13,27,94,0.2);
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header img { height: 36px; }
+  .header h1 {
+    color: var(--gold);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .header .badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* === MAIN === */
+  .main {
+    max-width: 680px;
+    margin: 28px auto;
+    padding: 0 16px;
+  }
+
+  /* === CARD === */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-num {
+    background: var(--navy);
+    color: var(--gold);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* === CONFIG === */
+  .config-bar {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+  }
+  .config-bar .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .config-bar .dot.green { background: var(--success); }
+  .config-bar .dot.red { background: var(--error); }
+  .config-bar button {
+    margin-right: auto;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-light);
+  }
+  .config-bar button:hover { background: var(--bg); }
+
+  /* === DROP ZONE === */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--gold);
+    background: #fffdf5;
+  }
+  .dropzone.has-file {
+    border-color: var(--success);
+    border-style: solid;
+    background: var(--success-bg);
+    padding: 20px;
+  }
+  .dropzone .icon { font-size: 36px; margin-bottom: 8px; }
+  .dropzone .text { font-size: 15px; color: var(--text-light); }
+  .dropzone .text strong { color: var(--gold); }
+  .dropzone .hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+  .dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: right;
+  }
+  .file-info .file-icon { font-size: 32px; }
+  .file-info .file-name { font-weight: 600; font-size: 14px; }
+  .file-info .file-size { font-size: 12px; color: var(--text-light); }
+  .file-info .file-remove {
+    margin-right: auto;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--error);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .file-info .file-remove:hover { background: var(--error-bg); }
+
+  /* === FORM === */
+  .form-row {
+    margin-bottom: 14px;
+  }
+  .form-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+  .form-row input, .form-row select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s;
+  }
+  .form-row input:focus, .form-row select:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(13,27,94,0.08);
+  }
+  .form-row input::placeholder { color: #c0c4cc; }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--navy);
+    color: var(--white);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--navy-light); }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  .btn-gold:hover:not(:disabled) { background: var(--gold-hover); }
+  .btn-outline {
+    background: var(--white);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover:not(:disabled) { background: var(--bg); }
+  .btn-success {
+    background: var(--success);
+    color: var(--white);
+  }
+  .btn-whatsapp {
+    background: #25D366;
+    color: var(--white);
+  }
+  .btn-whatsapp:hover:not(:disabled) { background: #1fb855; }
+
+  /* === RESULT === */
+  .result-section {
+    display: none;
+  }
+  .result-section.show { display: block; }
+  
+  .link-box {
+    background: #f8f9fc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    word-break: break-all;
+    color: var(--navy);
+    font-family: monospace;
+    direction: ltr;
+    text-align: left;
+    margin-bottom: 12px;
+    max-height: 60px;
+    overflow-y: auto;
+  }
+
+  .wa-preview {
+    background: #dcf8c6;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+    direction: rtl;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-group .btn { flex: 1; }
+
+  /* === STATUS === */
+  .status {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+    text-align: center;
+  }
+  .status.show { display: block; }
+  .status.loading { background: #eff6ff; color: #2563eb; }
+  .status.success { background: var(--success-bg); color: var(--success); }
+  .status.error { background: var(--error-bg); color: var(--error); }
+
+  /* === SPINNER === */
+  .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* === HISTORY === */
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item .hi-icon { font-size: 20px; }
+  .history-item .hi-name { font-weight: 600; }
+  .history-item .hi-date { color: var(--text-light); margin-right: auto; font-size: 12px; }
+  .history-item .hi-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .hi-status.pending { background: #fef3c7; color: #92400e; }
+  .hi-status.signed { background: var(--success-bg); color: var(--success); }
+
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-light);
+    font-size: 14px;
+  }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 460px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-size: 16px;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .modal .form-row input {
+    direction: ltr;
+    text-align: left;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  @media (max-width: 500px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .btn-group { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-right">
+    <img src="logo.png" alt="ספירה" onerror="this.style.display='none'">
+    <h1>Sphere Sign</h1>
+    <span class="badge">v2</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Config status -->
+  <div class="config-bar" id="configBar">
+    <span class="dot" id="configDot"></span>
+    <span id="configText">בודק חיבור...</span>
+    <button onclick="showConfig()">⚙️ הגדרות</button>
+  </div>
+
+  <!-- Step 1: Upload PDF -->
+  <div class="card">
+    <div class="card-title">
+      <span class="step-num">1</span>
+      העלאת מסמך
+    </div>
+    <div class="dropzone" id="dropzone">
+      <div class="icon">📄</div>
+      <div class="text">גרור PDF לכאן או <strong>לחץ לבחירה</strong></div>
+      <div class="hint">PDF בלבד, עד 10MB</div>
+      <input type="file" accept=".pdf" id="fileInput" onchange="handleFile(this.files[0])">
+    </div>
+  </div>
+
+  <!-- Step 2: Details -->
+  <div class="card">
+    <div class="card-title">
+      <span class="step-num">2</span>
+      פרטים
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>שם הלקוח</label>
+        <input type="text" id="clientName" placeholder="ישראל ישראלי">
+      </div>
+      <div class="form-row">
+        <label>סוג מסמך</label>
+        <select id="docType">
+          <option value="סיכום שיחה">סיכום שיחה</option>
+          <option value="אישור תנאי חיתום">אישור תנאי חיתום</option>
+          <option value="מסמך הלוואה">מסמך הלוואה מקופה</option>
+          <option value="חוזה שכר טרחה">חוזה שכר טרחה</option>
+          <option value="אחר">אחר</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>שם המסמך (כפי שיוצג ללקוח)</label>
+      <input type="text" id="docTitle" placeholder="ייקבע אוטומטית לפי שם הקובץ">
+    </div>
+  </div>
+
+  <!-- Step 3: Generate -->
+  <div class="card">
+    <div class="card-title">
+      <span class="step-num">3</span>
+      שליחה
+    </div>
+    <button class="btn btn-primary" id="generateBtn" onclick="generate()" disabled>
+      🔗 צור קישור חתימה
+    </button>
+    <div class="status" id="uploadStatus"></div>
+
+    <!-- Result -->
+    <div class="result-section" id="resultSection">
+      <div style="margin-top: 18px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">קישור חתימה:</label>
+        <div class="link-box" id="signLink"></div>
+      </div>
+      <div style="margin-top: 14px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">הודעת וואצאפ:</label>
+        <div class="wa-preview" id="waPreview"></div>
+      </div>
+      <div class="btn-group" style="margin-top: 12px;">
+        <button class="btn btn-whatsapp" onclick="sendWhatsApp()">
+          📱 שלח בוואצאפ
+        </button>
+        <button class="btn btn-outline" onclick="copyLink()">
+          📋 העתק קישור
+        </button>
+      </div>
+      <div class="status" id="copyStatus"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-title" style="border-bottom-color: var(--border);">
+      📋 אחרונים
+    </div>
+    <div id="historyList">
+      <div class="empty-state">אין מסמכים עדיין</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Config Modal -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h3>⚙️ הגדרות Sphere Sign</h3>
+    <div class="form-row">
+      <label>Apps Script Webhook URL</label>
+      <input type="text" id="configWebhook" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="form-row">
+      <label>Base URL (GitHub Pages)</label>
+      <input type="text" id="configBase" placeholder="https://sagiasayag-sphere.github.io/sphere-sign">
+    </div>
+    <div class="btn-group" style="margin-top: 16px;">
+      <button class="btn btn-primary" onclick="saveConfig()">💾 שמור</button>
+      <button class="btn btn-outline" onclick="closeConfig()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// CONFIG
+// ==========================================
+const STORAGE_KEY = 'sphere-sign-config';
+const HISTORY_KEY = 'sphere-sign-history';
+
+let config = loadConfig();
+let uploadedFile = null;
+let uploadedBase64 = null;
+let generatedLink = '';
+
+function loadConfig() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return {
+    webhook: 'https://script.google.com/macros/s/AKfycbzSY-ek2-GM7qsflZRkhzd8hIKrzrINqZfIXtTCqViB65AZMUsjJSA0CQdv-Fz8gize2w/exec',
+    baseUrl: 'https://sagiasayag-sphere.github.io/sphere-sign',
+  };
+}
+
+function saveConfigToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+}
+
+// ==========================================
+// INIT
+// ==========================================
+checkConnection();
+loadHistory();
+
+// ==========================================
+// CONFIG MODAL
+// ==========================================
+function showConfig() {
+  document.getElementById('configWebhook').value = config.webhook;
+  document.getElementById('configBase').value = config.baseUrl;
+  document.getElementById('configModal').classList.add('show');
+}
+
+function closeConfig() {
+  document.getElementById('configModal').classList.remove('show');
+}
+
+function saveConfig() {
+  config.webhook = document.getElementById('configWebhook').value.trim();
+  config.baseUrl = document.getElementById('configBase').value.trim().replace(/\/$/, '');
+  saveConfigToStorage();
+  closeConfig();
+  checkConnection();
+}
+
+// Click outside modal to close
+document.getElementById('configModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfig();
+});
+
+async function checkConnection() {
+  const dot = document.getElementById('configDot');
+  const text = document.getElementById('configText');
+  
+  if (!config.webhook) {
+    dot.className = 'dot red';
+    text.textContent = 'לא הוגדר webhook — לחץ הגדרות';
+    return;
+  }
+  
+  try {
+    dot.className = 'dot';
+    dot.style.background = '#fbbf24';
+    text.textContent = 'בודק חיבור...';
+    
+    const resp = await fetch(config.webhook);
+    const data = await resp.json();
+    
+    if (data.status) {
+      dot.className = 'dot green';
+      text.textContent = 'מחובר ✓';
+    } else {
+      throw new Error('Bad response');
+    }
+  } catch(e) {
+    dot.className = 'dot red';
+    text.textContent = 'שגיאת חיבור — בדוק את ה-webhook';
+  }
+}
+
+// ==========================================
+// FILE UPLOAD
+// ==========================================
+const dropzone = document.getElementById('dropzone');
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('drag-over');
+});
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('drag-over');
+});
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    showUploadStatus('רק קבצי PDF', 'error');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showUploadStatus('הקובץ גדול מ-10MB', 'error');
+    return;
+  }
+  
+  uploadedFile = file;
+  
+  // Convert to base64
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedBase64 = reader.result.split(',')[1];
+    updateGenerateButton();
+  };
+  reader.readAsDataURL(file);
+  
+  // Update dropzone UI
+  const sizeKB = (file.size / 1024).toFixed(0);
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  const sizeStr = file.size > 1024 * 1024 ? sizeMB + ' MB' : sizeKB + ' KB';
+  
+  dropzone.classList.add('has-file');
+  dropzone.innerHTML = `
+    <div class="file-info">
+      <span class="file-icon">📄</span>
+      <div>
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${sizeStr}</div>
+      </div>
+      <button class="file-remove" onclick="removeFile(event)" title="הסר">✕</button>
+    </div>
+  `;
+  
+  // Auto-fill doc title
+  if (!document.getElementById('docTitle').value) {
+    document.getElementById('docTitle').value = file.name.replace('.pdf', '');
+  }
+}
+
+function removeFile(e) {
+  e.stopPropagation();
+  uploadedFile = null;
+  uploadedBase64 = null;
+  dropzone.classList.remove('has-file');
+  dropzone.innerHTML = `
+    <div class="icon">📄</div>
+    <div class="text">גרור PDF לכאן או <strong>לחץ לבחירה</strong></div>
+    <div class="hint">PDF בלבד, עד 10MB</div>
+    <input type="file" accept=".pdf" id="fileInput" onchange="handleFile(this.files[0])">
+  `;
+  updateGenerateButton();
+}
+
+function updateGenerateButton() {
+  const hasFile = uploadedBase64 !== null;
+  const hasName = document.getElementById('clientName').value.trim() !== '';
+  document.getElementById('generateBtn').disabled = !(hasFile && hasName);
+}
+
+// Listen for name input
+document.getElementById('clientName').addEventListener('input', updateGenerateButton);
+
+// ==========================================
+// GENERATE LINK
+// ==========================================
+async function generate() {
+  if (!uploadedBase64 || !config.webhook) {
+    if (!config.webhook) showUploadStatus('הגדר webhook קודם (⚙️)', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> מעלה מסמך...';
+  showUploadStatus('מעלה PDF ל-Google Drive...', 'loading');
+  
+  const clientName = document.getElementById('clientName').value.trim();
+  const docType = document.getElementById('docType').value;
+  const docTitle = document.getElementById('docTitle').value.trim() || uploadedFile.name.replace('.pdf', '');
+  
+  try {
+    const resp = await fetch(config.webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'upload',
+        pdf: uploadedBase64,
+        filename: uploadedFile.name,
+        clientName: clientName,
+        docType: docType,
+      }),
+    });
+    
+    const data = await resp.json();
+    
+    if (!data.success) throw new Error(data.error || 'Upload failed');
+    
+    // Build signature link
+    const params = new URLSearchParams({
+      id: data.fileId,
+      title: docTitle,
+      name: clientName,
+      webhook: config.webhook,
+    });
+    generatedLink = config.baseUrl + '/index.html?' + params.toString();
+    
+    // Show result
+    document.getElementById('signLink').textContent = generatedLink;
+    
+    const waMessage = `שלום ${clientName},\nמצורף קישור לחתימה על ${docTitle}:\n${generatedLink}\n\nספירה ביטוח ופיננסים 🟡`;
+    document.getElementById('waPreview').textContent = waMessage;
+    
+    document.getElementById('resultSection').classList.add('show');
+    showUploadStatus('✅ הקישור מוכן!', 'success');
+    
+    // Save to history
+    addToHistory({
+      clientName,
+      docTitle,
+      docType,
+      fileId: data.fileId,
+      link: generatedLink,
+      date: new Date().toISOString(),
+      status: 'pending',
+    });
+    
+  } catch(err) {
+    console.error('Upload error:', err);
+    showUploadStatus('❌ שגיאה: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔗 צור קישור חתימה';
+    updateGenerateButton();
+  }
+}
+
+// ==========================================
+// ACTIONS
+// ==========================================
+function copyLink() {
+  navigator.clipboard.writeText(generatedLink).then(() => {
+    showCopyStatus('✅ הקישור הועתק!', 'success');
+  });
+}
+
+function sendWhatsApp() {
+  const clientName = document.getElementById('clientName').value.trim();
+  const docTitle = document.getElementById('docTitle').value.trim() || 'מסמך';
+  const msg = `שלום ${clientName},\nמצורף קישור לחתימה על ${docTitle}:\n${generatedLink}\n\nספירה ביטוח ופיננסים`;
+  const encoded = encodeURIComponent(msg);
+  window.open('https://wa.me/?text=' + encoded, '_blank');
+}
+
+// ==========================================
+// HISTORY
+// ==========================================
+function loadHistory() {
+  const list = document.getElementById('historyList');
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch(e) {}
+  
+  if (history.length === 0) {
+    list.innerHTML = '<div class="empty-state">אין מסמכים עדיין</div>';
+    return;
+  }
+  
+  // Show last 10, newest first
+  const recent = history.slice(-10).reverse();
+  list.innerHTML = recent.map(item => {
+    const d = new Date(item.date);
+    const dateStr = d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    const statusClass = item.status === 'signed' ? 'signed' : 'pending';
+    const statusText = item.status === 'signed' ? 'נחתם ✓' : 'ממתין';
+    return `<div class="history-item">
+      <span class="hi-icon">📄</span>
+      <div>
+        <div class="hi-name">${item.clientName}</div>
+        <div style="font-size:12px;color:var(--text-light);">${item.docTitle}</div>
+      </div>
+      <span class="hi-date">${dateStr}</span>
+      <span class="hi-status ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
+}
+
+function addToHistory(item) {
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch(e) {}
+  history.push(item);
+  // Keep last 50
+  if (history.length > 50) history = history.slice(-50);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  loadHistory();
+}
+
+// ==========================================
+// STATUS HELPERS
+// ==========================================
+function showUploadStatus(msg, type) {
+  const el = document.getElementById('uploadStatus');
+  el.textContent = msg;
+  el.className = 'status show ' + type;
+  if (type !== 'loading') {
+    setTimeout(() => { el.className = 'status'; }, 5000);
+  }
+}
+
+function showCopyStatus(msg, type) {
+  const el = document.getElementById('copyStatus');
+  el.textContent = msg;
+  el.className = 'status show ' + type;
+  setTimeout(() => { el.className = 'status'; }, 3000);
+}
+</script>
+</body>
+</html>
