@@ -1,74 +1,715 @@
-￼
-סיכום פגישה טלפונית מוקלטת
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>חתימה דיגיטלית — ספירה ביטוח ופיננסים</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #0D1B5E;
+    --gold: #E8B829;
+    --bg: #f0f2f7;
+    --white: #fff;
+    --text: #1a1a2e;
+    --text-light: #6b7280;
+    --border: #e2e5ef;
+    --success: #059669;
+    --success-bg: #ecfdf5;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+  }
 
-פרטי המבוטח
-נושא הפגישה: פנסיוני, פיננסי ופרט
-תאריך הפגישה: 23/03/2026
-שם המבוטח: אביהו לוי פרץ
-ת.ז: 205501117
-גיל: 31
-מצב משפחתי: רווק
-עיסוק: עצמאי — מתווך נדל"ן
-מעמד: עצמאי
-הפגישה התקיימה טלפונית, מוקלטת ובהסכמה, ומהווה חלק מהליך בירור צרכים והתאמת ביטוח בהתאם להוראות חוזר צירוף לביטוח 2016-1-7.
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    line-height: 1.7;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-חלק א' — פנסיוני
-מצב קיים: לא קיים כל ביטוח חיסכון לגיל פרישה ולא קיימים כיסויים ביטוחיים (מוות ונכות). למבוטח הוסבר בהרחבה אודות חשיבות קרן הפנסיה, בדגש על חיסכון לגיל פרישה, כיסויי ביטוח (נכות ושאירים), מסלולי השקעה ודמי ניהול.
->> המלצה: פתיחת קרן פנסיה בחברת מור
-הפקדה חודשית: 1,500 ש"ח
-שכר חודשי מבוטח: 9,375 ש"ח
-מסלול השקעה: מניות
-דמי ניהול: 1% מהפקדה ו-0.22% מצבירה
-נימוק: למבוטח אין כל חיסכון פנסיוני ואין כיסויים ביטוחיים למקרה נכות או פטירה. מצב זה חושף אותו לסיכון כלכלי משמעותי. חברת מור נבחרה בשל דמי ניהול תחרותיים, ביצועי השקעה היסטוריים ושירות מתאים לצרכיו. בנוסף, עקב מצב רפואי קיים, נבחרה קרן פנסיה ללא חיתום רפואי — לאחר תקופת אכשרה של 5 שנים תבוטל החרגת המצב הרפואי הקיים והמבוטח יהנה מכיסוי מלא.
-תקופת אכשרה: על כיסויי הביטוח תחול תקופת אכשרה של 5 שנים ביחס למצב רפואי קיים (pre-existing). הוסבר למבוטח כי במהלך תקופה זו, תביעה הנובעת ממצב רפואי קודם למועד ההצטרפות עלולה שלא להיות מכוסה.
-ויתור שאירים: המבוטח רווק וללא תלויים. לפיכך, בוצע ויתור שאירים למקרה פטירה. הוויתור תקף לתקופה של שנתיים ויחודש אוטומטית.
-הערה חשובה: הובהר למבוטח כי בכל שינוי סטטוס משפחתי (נישואין, לידת ילד, בן/בת זוג ידוע/ה בציבור) חלה עליו חובה ליידע את הסוכן לצורך עדכון הכיסוי ובחינת הצורך בביטול הוויתור.
+  /* Header */
+  .header {
+    background: var(--navy);
+    padding: 14px 20px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(13,27,94,0.15);
+  }
+  .header h1 {
+    color: var(--gold);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .header .sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin-top: 2px;
+  }
 
-חלק ב' — פיננסי
-מצב קיים: קיימת קרן השתלמות במעמד עצמאי בחברת הראל. אין הפקדות שוטפות. דמי ניהול: 0.6% מצבירה. מסלול השקעה: עוקב S&P500. צבירה קיימת: 47,175 ש"ח.
->> המלצה: ניוד קרן ההשתלמות לחברת כלל
-דמי ניהול: 0.6% מצבירה
-מסלול השקעה: מניות
-הפקדה חודשית שוטפת: כרגע ללא הפקדות שוטפות
-נימוק: קרן ההשתלמות בהראל אינה פעילה (ללא הפקדות שוטפות) ולכן אינה ממצה את הטבת המס לעצמאי. ניוד לכלל ייעשה תוך שמירה על דמי ניהול זהים של 0.6%, ומעבר למסלול מניות (במקום עוקב S&P500 בלבד) לצורך פיזור רחב יותר. בשלב זה הקופה תהיה מוכנה לחידוש הפקדות שוטפות בעתיד לצורך ניצול הטבת המס.
+  /* Container */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 14px;
+  }
 
-חלק ג' — פרט
-1. ביטוח חיים (ריסק מוות)
-מצב קיים: קיים ביטוח חיים פרט על סכום ביטוח של 1,500,000 ש"ח בחברת הראל. פרמיה חודשית משתנה: 56 ש"ח.
->> המלצה: העברת ביטוח החיים לחברת כלל
-סכום ביטוח: 1,500,000 ש"ח
-פרמיה חודשית משתנה: 47 ש"ח
-קוד הנחה: 3564
-לוח הנחות: שנה 1 — 63% | שנה 2-3 — 53% | שנה 4-5 — 43% | שנה 6 — 33%
-נימוק: המעבר לכלל מוזיל את הפרמיה מ-56 ל-47 ש"ח על אותו סכום ביטוח, כולל הנחה מדורגת ל-6 שנים. המבוטח רווק וצעיר, וסכום הביטוח נועד להגנה על התחייבויות כלכליות קיימות ועתידיות.
-הערה חשובה: הובהר למבוטח כי הפרמיה משתנה ועולה עם הגיל, וכי לוח ההנחות הוא לתקופה מוגבלת. ביטול הפוליסה הקיימת בהראל ייעשה אך ורק לאחר הפקת הפוליסה החדשה בכלל וקבלת אישור על כיסוי ביטוחי בתוקף.
-2. ביטוח בריאות פרט
-מצב קיים: קיים ביטוח בריאות בחברת הראל, שנפתח לאחר הרפורמה בתאריך 03/07/2025, הכולל: השתלות, תרופות, ניתוחים ומחליפי ניתוח בחו"ל, ניתוח ומחליפי ניתוח בישראל — משלים שב"ן, ייעוץ ובדיקות ואבחון מהיר. בנוסף, כיסוי מחלות קשות על סכום פיצוי של 250,000 ש"ח.
-פרמיה חודשית משתנה: 232 ש"ח
-החרגה קיימת: ברך ימין — חלה על: תרופות, ניתוחים בישראל ובחו"ל, ייעוץ ובדיקות.
->> המלצה: העברת ביטוח הבריאות לחברת כלל
-כל הכיסויים יועברו כפי שהם, כולל מחלות קשות, תוך שמירה על רצף ביטוחי.
-פרמיה חודשית: 221 ש"ח
-הנחה: 15% למשך 10 שנים
-נימוק: המעבר לכלל נעשה תוך שמירה מלאה על רצף ביטוחי, ללא אובדן כיסויים, ועם הנחה של 15% למשך 10 שנים. הפוליסה בהראל נפתחה לאחר הרפורמה (07/2025) ולכן כפופה לחוזר 2015-1-19. בכלל יישמרו אותם כיסויים, כולל מחלות קשות.
-הערה חשובה: ההחרגה על ברך ימין תישאר גם בכלל. ביטול הפוליסה בהראל ייעשה אך ורק לאחר הפקת הפוליסה החדשה בכלל ואישור כיסוי בתוקף.
+  /* Card */
+  .card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .card-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-הצהרות והבהרות
-1. כל ההמלצות מבוססות על המידע שנמסר על ידי המבוטח. מידע חלקי או שגוי עלול לגרום לאי התאמה.
-2. אין לבטל פוליסה קיימת לפני הפקת ואישור הפוליסה החדשה. סוכנות ספירה לא תהיה אחראית לנזק מביטול שלא על פי הנחיה.
-3. הפרמיות בביטוחי חיים ובריאות הינן משתנות ועלולות לעלות עם הגיל ו/או בהתאם לשינויים בשוק.
-4. הצהרת הבריאות שתימסר לחברת הביטוח החדשה חייבת להיות מלאה, מדויקת ונכונה. אי גילוי עלול לפגוע בזכויות במקרה תביעה.
-5. הוצגו לפחות שתי חלופות בכל תחום, וההמלצה ניתנה לאחר השוואה והתאמה לצרכים.
-6. המבוטח אישר כי הבין את כלל ההסברים וההמלצות, וכי הוא פועל מרצונו החופשי.
-7. סיכום זה נערך על בסיס פגישה מוקלטת בהסכמה. ההקלטה מהווה חלק בלתי נפרד מתיעוד הפגישה.
+  /* Doc info */
+  .doc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+  }
+  .doc-row:last-child { border: none; }
+  .doc-row .lbl { color: var(--text-light); }
+  .doc-row .val { font-weight: 600; }
 
-חתימת המבוטח
-אני, אביהו לוי פרץ, ת.ז. 205501117, מאשר כי קראתי את סיכום הפגישה, הבנתי את כלל ההמלצות וההבהרות, ואני חותם מרצוני החופשי.
+  /* Status indicator */
+  .doc-status {
+    text-align: center;
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+  .doc-status.loading { background: #eff6ff; color: #2563eb; }
+  .doc-status.ok { background: var(--success-bg); color: var(--success); }
+  .doc-status.err { background: var(--error-bg); color: var(--error); }
+  .doc-status .big { font-size: 32px; display: block; margin-bottom: 6px; }
 
-חתמו כאן ☝️
+  /* Signature */
+  .sig-wrap {
+    position: relative;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: #fafbfd;
+    overflow: hidden;
+    touch-action: none;
+  }
+  .sig-wrap.active { border-color: var(--navy); }
+  .sig-wrap.locked {
+    border-color: var(--success);
+    background: #f7fdf9;
+  }
+  .sig-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    cursor: crosshair;
+  }
+  .sig-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #c8cdd8;
+    font-size: 15px;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .sig-placeholder .hand { font-size: 32px; }
 
+  .sig-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .sig-actions .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sig-actions .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-clear { background: #f3f4f6; color: var(--text-light); }
+  .btn-clear:hover:not(:disabled) { background: #e5e7eb; }
+  .btn-confirm { background: var(--navy); color: var(--white); }
+  .btn-confirm:hover:not(:disabled) { background: #0a1548; }
 
-נקה חתימה
-אשר חתימה
-שלח לסוכן ✉️
-ספירה ביטוח ופיננסים | שגיא אסייג — L-00108082 | 055-9137893 | sagi@sphere-ifs.co.il
+  .timestamp-badge {
+    text-align: center;
+    font-size: 13px;
+    color: var(--success);
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 6px 10px;
+    background: var(--success-bg);
+    border-radius: 6px;
+    display: none;
+  }
+
+  /* Consent */
+  .consent {
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: #fefce8;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+  .consent.show { display: flex; }
+  .consent input {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--navy);
+    flex-shrink: 0;
+  }
+  .consent label { font-size: 13px; line-height: 1.5; }
+
+  /* Main buttons */
+  .main-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .main-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-send { background: var(--success); color: var(--white); }
+  .btn-send:hover:not(:disabled) { background: #047857; }
+  .btn-download { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+  .btn-download:hover:not(:disabled) { background: var(--bg); }
+
+  .global-status {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: none;
+  }
+  .global-status.show { display: block; }
+  .global-status.success { background: var(--success-bg); color: var(--success); }
+  .global-status.error { background: var(--error-bg); color: var(--error); }
+  .global-status.loading { background: #eff6ff; color: #2563eb; }
+
+  /* Done state */
+  .done-card {
+    display: none;
+    text-align: center;
+    padding: 32px 20px;
+  }
+  .done-card.show { display: block; }
+  .done-card .check { font-size: 56px; }
+  .done-card h2 { color: var(--success); margin: 12px 0 8px; font-size: 20px; }
+  .done-card p { color: var(--text-light); font-size: 14px; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 18px 16px;
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+  .footer b { color: var(--navy); }
+  .footer a { color: var(--navy); text-decoration: none; }
+
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ספירה ביטוח ופיננסים</h1>
+  <div class="sub">חתימה דיגיטלית על מסמך</div>
+</div>
+
+<div class="container">
+
+  <!-- Doc Info -->
+  <div class="card" id="docCard">
+    <div class="card-label">📄 פרטי המסמך</div>
+    <div class="doc-row">
+      <span class="lbl">מסמך</span>
+      <span class="val" id="infoTitle">טוען...</span>
+    </div>
+    <div class="doc-row">
+      <span class="lbl">עמודים</span>
+      <span class="val" id="infoPages">—</span>
+    </div>
+    <div id="docStatusArea">
+      <div class="doc-status loading" id="docStatus">
+        <span class="big">⏳</span>
+        טוען מסמך...
+      </div>
+    </div>
+  </div>
+
+  <!-- Signature -->
+  <div class="card" id="sigCard" style="display:none;">
+    <div class="card-label">✍️ חתימה</div>
+    <div class="sig-wrap" id="sigWrap">
+      <canvas id="sigCanvas"></canvas>
+      <div class="sig-placeholder" id="sigPH">
+        <span class="hand">☝️</span>
+        חתום כאן עם האצבע
+      </div>
+    </div>
+    <div class="sig-actions">
+      <button class="btn btn-clear" id="clearBtn" onclick="clearSig()">🗑️ נקה</button>
+      <button class="btn btn-confirm" id="confirmBtn" disabled onclick="confirmSig()">✅ אשר חתימה</button>
+    </div>
+    <div class="timestamp-badge" id="tsBadge"></div>
+    <div class="consent" id="consent">
+      <input type="checkbox" id="consentCheck" onchange="updateActions()">
+      <label for="consentCheck">
+        אני מאשר/ת כי קראתי את המסמך, הבנתי את תוכנו, ואני חותם/ת עליו מרצוני החופשי.
+      </label>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div id="actionsArea" style="display:none;">
+    <button class="main-btn btn-send" id="sendBtn" disabled onclick="sendSigned()">
+      📧 שלח מסמך חתום לסוכן
+    </button>
+    <button class="main-btn btn-download" id="dlBtn" disabled onclick="downloadSigned()">
+      📥 הורד PDF חתום
+    </button>
+  </div>
+
+  <div class="global-status" id="gStatus"></div>
+
+  <!-- Done -->
+  <div class="card done-card" id="doneCard">
+    <div class="check">✅</div>
+    <h2>המסמך נחתם ונשלח בהצלחה</h2>
+    <p>העתק חתום נשלח לסוכנות ספירה ביטוח ופיננסים.<br>תודה!</p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <b>ספירה ביטוח ופיננסים</b><br>
+  שגיא אסייג — רישיון סוכן L-00108082<br>
+  <a href="tel:0559137893">055-9137893</a> | <a href="mailto:sagi@sphere-ifs.co.il">sagi@sphere-ifs.co.il</a>
+</div>
+
+<script>
+const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+// === PARAMS ===
+const P = new URLSearchParams(location.search);
+const FILE_ID = P.get('id') || '';
+const DOC_TITLE = P.get('title') || 'מסמך לחתימה';
+const CLIENT_NAME = P.get('name') || '';
+const WEBHOOK = P.get('webhook') || '';
+
+// === STATE ===
+let originalPdfBytes = null;
+let sigConfirmed = false;
+let sigTimestamp = '';
+
+// === INIT ===
+document.getElementById('infoTitle').textContent = DOC_TITLE;
+
+if (!FILE_ID || !WEBHOOK) {
+  showDocError('קישור לא תקין. פנה לסוכן לקבלת קישור חדש.');
+} else {
+  loadPdf();
+}
+
+// ==========================================
+// PDF LOADING (via Apps Script proxy)
+// ==========================================
+async function loadPdf() {
+  try {
+    const resp = await fetch(WEBHOOK, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'fetch',
+        fileId: FILE_ID,
+      }),
+    });
+    const data = await resp.json();
+    
+    if (!data.success) throw new Error(data.error || 'Failed to load');
+    
+    // Decode base64
+    const raw = atob(data.pdf);
+    originalPdfBytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) originalPdfBytes[i] = raw.charCodeAt(i);
+    
+    // Validate
+    const doc = await PDFDocument.load(originalPdfBytes);
+    const pages = doc.getPageCount();
+    
+    document.getElementById('infoPages').textContent = pages;
+    document.getElementById('docStatus').className = 'doc-status ok';
+    document.getElementById('docStatus').innerHTML = '<span class="big">📄</span>המסמך נטען — ' + pages + ' עמודים';
+    
+    // Show signature section
+    document.getElementById('sigCard').style.display = '';
+    document.getElementById('actionsArea').style.display = '';
+    initCanvas();
+    
+  } catch(err) {
+    console.error(err);
+    showDocError('שגיאה בטעינת המסמך. נסה שוב או פנה לסוכן.');
+  }
+}
+
+function showDocError(msg) {
+  document.getElementById('docStatus').className = 'doc-status err';
+  document.getElementById('docStatus').innerHTML = '<span class="big">❌</span>' + msg;
+}
+
+// ==========================================
+// SIGNATURE CANVAS
+// ==========================================
+let canvas, ctx;
+let drawing = false;
+let hasSigned = false;
+let paths = [];
+let curPath = [];
+
+function initCanvas() {
+  canvas = document.getElementById('sigCanvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDraw, { passive: false });
+}
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = 150 * dpr;
+  canvas.style.height = '150px';
+  ctx.scale(dpr, dpr);
+  setupCtx();
+  redraw();
+}
+
+function setupCtx() {
+  ctx.strokeStyle = '#0D1B5E';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+
+function redraw() {
+  const dpr = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width/dpr, canvas.height/dpr);
+  setupCtx();
+  for (const p of paths) {
+    if (p.length < 2) continue;
+    ctx.beginPath();
+    ctx.moveTo(p[0].x, p[0].y);
+    for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
+    ctx.stroke();
+  }
+}
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX - r.left, y: t.clientY - r.top };
+}
+
+function startDraw(e) {
+  if (sigConfirmed) return;
+  e.preventDefault();
+  drawing = true;
+  curPath = [getPos(e)];
+  ctx.beginPath();
+  ctx.moveTo(curPath[0].x, curPath[0].y);
+  document.getElementById('sigWrap').classList.add('active');
+  if (!hasSigned) {
+    hasSigned = true;
+    document.getElementById('sigPH').style.opacity = '0';
+    document.getElementById('confirmBtn').disabled = false;
+  }
+}
+
+function draw(e) {
+  if (!drawing || sigConfirmed) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  curPath.push(pos);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+}
+
+function stopDraw(e) {
+  if (!drawing) return;
+  if (e) e.preventDefault();
+  drawing = false;
+  if (curPath.length) paths.push([...curPath]);
+  curPath = [];
+  document.getElementById('sigWrap').classList.remove('active');
+}
+
+function clearSig() {
+  if (sigConfirmed) return;
+  paths = []; curPath = [];
+  const dpr = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width/dpr, canvas.height/dpr);
+  hasSigned = false;
+  document.getElementById('sigPH').style.opacity = '1';
+  document.getElementById('confirmBtn').disabled = true;
+}
+
+function confirmSig() {
+  if (!hasSigned) return;
+  sigConfirmed = true;
+  const now = new Date();
+  sigTimestamp = now.toLocaleString('he-IL', {
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit'
+  });
+  
+  document.getElementById('sigWrap').classList.add('locked');
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('clearBtn').disabled = true;
+  
+  const badge = document.getElementById('tsBadge');
+  badge.textContent = '✅ חתימה אושרה — ' + sigTimestamp;
+  badge.style.display = 'block';
+  
+  document.getElementById('consent').classList.add('show');
+  updateActions();
+}
+
+function updateActions() {
+  const ok = sigConfirmed && document.getElementById('consentCheck').checked;
+  document.getElementById('sendBtn').disabled = !ok;
+  document.getElementById('dlBtn').disabled = !ok;
+}
+
+// ==========================================
+// BUILD SIGNED PDF
+// ==========================================
+async function buildSignedPdf() {
+  const pdfDoc = await PDFDocument.load(originalPdfBytes);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  
+  const page = pdfDoc.addPage([595.28, 841.89]);
+  const { width: W, height: H } = page.getSize();
+  const navy = rgb(13/255,27/255,94/255);
+  const gold = rgb(232/255,184/255,41/255);
+  const gray = rgb(0.4,0.4,0.4);
+  const lgray = rgb(0.85,0.85,0.85);
+  const white = rgb(1,1,1);
+
+  // -- Top gold bar
+  page.drawRectangle({ x:0, y:H-6, width:W, height:6, color:gold });
+
+  // -- Title
+  let y = H - 50;
+  center('DIGITAL SIGNATURE CONFIRMATION', y, 18, fontB, navy);
+  y -= 22;
+  center('Sphere Insurance & Finance', y, 11, font, gray);
+
+  // -- Separator
+  y -= 18;
+  page.drawLine({ start:{x:50,y}, end:{x:W-50,y}, thickness:1.5, color:gold });
+
+  // -- Details
+  y -= 30;
+  const details = [
+    ['Document:', DOC_TITLE],
+    ['Signed by:', CLIENT_NAME || '—'],
+    ['Date & Time:', sigTimestamp],
+    ['Original pages:', String(pdfDoc.getPageCount() - 1)],
+    ['Method:', 'Electronic signature via web (canvas)'],
+  ];
+  for (const [label, value] of details) {
+    page.drawText(label, { x:70, y, size:10, font:fontB, color:navy });
+    page.drawText(value, { x:210, y, size:10, font, color:gray });
+    y -= 22;
+  }
+
+  // -- Signature image
+  y -= 15;
+  page.drawText('Signature:', { x:70, y, size:12, font:fontB, color:navy });
+  y -= 12;
+
+  const sigData = canvas.toDataURL('image/png');
+  const sigBytes = Uint8Array.from(atob(sigData.split(',')[1]), c=>c.charCodeAt(0));
+  const sigImg = await pdfDoc.embedPng(sigBytes);
+  
+  const sW = 280, sH = 90, sX = (W-sW)/2;
+  page.drawRectangle({ x:sX-6, y:y-sH-6, width:sW+12, height:sH+12,
+    borderColor:lgray, borderWidth:1, color:rgb(0.98,0.98,0.98) });
+  page.drawImage(sigImg, { x:sX, y:y-sH, width:sW, height:sH });
+
+  y -= sH + 35;
+
+  // -- Disclaimers
+  page.drawLine({ start:{x:50,y}, end:{x:W-50,y}, thickness:0.5, color:lgray });
+  y -= 18;
+
+  const disc = [
+    'This document was digitally signed via Sphere Insurance & Finance.',
+    'The signer confirmed reading the document and signing voluntarily.',
+    'This constitutes a valid electronic signature under the',
+    'Electronic Signature Law, 5761-2001 (Israel).',
+    '',
+    'Sphere Insurance & Finance is not a party to this agreement',
+    'and bears no responsibility for its content.',
+    'This document does not constitute legal advice.',
+    'The signer may revoke their signature in accordance with applicable law.',
+  ];
+  for (const line of disc) {
+    if (!line) { y -= 8; continue; }
+    center(line, y, 8.5, font, gray);
+    y -= 14;
+  }
+
+  // -- Footer
+  page.drawRectangle({ x:0, y:0, width:W, height:32, color:navy });
+  page.drawRectangle({ x:0, y:32, width:W, height:2, color:gold });
+  const ft = 'Sphere Insurance & Finance | Sagi Asayag | L-00108082 | 055-9137893 | sagi@sphere-ifs.co.il';
+  center(ft, 12, 7.5, font, white);
+
+  return await pdfDoc.save();
+
+  function center(text, yp, size, f, color) {
+    const tw = f.widthOfTextAtSize(text, size);
+    page.drawText(text, { x:(W-tw)/2, y:yp, size, font:f, color });
+  }
+}
+
+// ==========================================
+// SEND
+// ==========================================
+async function sendSigned() {
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> שולח...';
+  showGlobal('בונה PDF חתום ושולח...', 'loading');
+
+  try {
+    const pdfBytes = await buildSignedPdf();
+    const b64 = uint8ToBase64(pdfBytes);
+    
+    const resp = await fetch(WEBHOOK, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'signed',
+        pdf: b64,
+        filename: DOC_TITLE + ' — signed.pdf',
+        clientName: CLIENT_NAME,
+        timestamp: sigTimestamp,
+        docTitle: DOC_TITLE,
+      }),
+    });
+    const data = await resp.json();
+    if (!data.success) throw new Error(data.error || 'Send failed');
+
+    // Show done state
+    document.getElementById('sigCard').style.display = 'none';
+    document.getElementById('actionsArea').style.display = 'none';
+    document.getElementById('gStatus').className = 'global-status';
+    document.getElementById('doneCard').classList.add('show');
+    
+  } catch(err) {
+    console.error(err);
+    showGlobal('שגיאה בשליחה. נסה להוריד את ה-PDF במקום.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '📧 שלח מסמך חתום לסוכן';
+  }
+}
+
+async function downloadSigned() {
+  const btn = document.getElementById('dlBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ מכין...';
+
+  try {
+    const pdfBytes = await buildSignedPdf();
+    const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = DOC_TITLE + ' — signed.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+    showGlobal('✅ ה-PDF הורד', 'success');
+  } catch(err) {
+    showGlobal('שגיאה: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📥 הורד PDF חתום';
+    updateActions();
+  }
+}
+
+// ==========================================
+// HELPERS
+// ==========================================
+function uint8ToBase64(arr) {
+  let bin = '';
+  for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+  return btoa(bin);
+}
+
+function showGlobal(msg, type) {
+  const el = document.getElementById('gStatus');
+  el.textContent = msg;
+  el.className = 'global-status show ' + type;
+  if (type !== 'loading') setTimeout(() => { el.className = 'global-status'; }, 5000);
+}
+</script>
+</body>
+</html>
