@@ -443,7 +443,7 @@ function postToGAS(url, data) {
       window.removeEventListener('message', onMsg);
       cleanup();
       reject(new Error('Request timed out'));
-    }, 60000);
+    }, 120000);
 
     function cleanup() {
       setTimeout(() => { try { form.remove(); iframe.remove(); } catch(x){} }, 1000);
@@ -760,14 +760,16 @@ async function sendSigned() {
     if (!data.success) throw new Error(data.error || 'Send failed');
 
     // Show done state
+    document.getElementById('viewerCard').style.display = 'none';
     document.getElementById('sigCard').style.display = 'none';
     document.getElementById('actionsArea').style.display = 'none';
     document.getElementById('gStatus').className = 'global-status';
     document.getElementById('doneCard').classList.add('show');
     
   } catch(err) {
-    console.error(err);
-    showGlobal('שגיאה בשליחה. נסה להוריד את ה-PDF במקום.', 'error');
+    console.error('sendSigned error:', err);
+    const detail = err.message || String(err);
+    showGlobal('שגיאה בשליחה: ' + detail, 'error');
     btn.disabled = false;
     btn.innerHTML = '📧 שלח מסמך חתום לסוכן';
   }
