@@ -1,36 +1,34 @@
 // =====================================================
 // Sphere Sign v2 — Google Apps Script Backend
-// Client sends: fetch POST with Content-Type: text/plain
-// Server returns: ContentService JSON
+// Client: form POST via hidden iframe
+// Server: HtmlService + window.top.postMessage (bypasses CORS)
 // =====================================================
 
-// === CONFIGURATION ===
-var FOLDER_ID = '';          // Google Drive folder ID (empty = root)
-var SIGNED_FOLDER_ID = '';   // Folder for signed docs (empty = same as FOLDER_ID)
+var FOLDER_ID = '';
+var SIGNED_FOLDER_ID = '';
 var NOTIFY_EMAIL = 'sagi@sphere-ifs.co.il';
 var SEND_EMAIL = true;
 
 // =====================================================
-// doPost — main entry point
+// doPost
 // =====================================================
 function doPost(e) {
   var result;
+  var reqId = '';
   try {
-    // Try to parse JSON from body (fetch text/plain) or from form field
     var raw = '';
-    if (e.postData && e.postData.contents) {
-      raw = e.postData.contents;
-    } else if (e.parameter && e.parameter.payload) {
+    if (e && e.parameter && e.parameter.payload) {
       raw = e.parameter.payload;
+    } else if (e && e.postData && e.postData.contents) {
+      raw = e.postData.contents;
     }
-
     if (!raw) {
       result = { success: false, error: 'No data received' };
-      return ContentService.createTextOutput(JSON.stringify(result))
-        .setMimeType(ContentService.MimeType.JSON);
+      return _respond(result, reqId);
     }
 
     var data = JSON.parse(raw);
+    reqId = data._reqId || '';
     var action = data.action || '';
 
     if (action === 'upload') {
@@ -46,20 +44,31 @@ function doPost(e) {
     result = { success: false, error: String(err) };
   }
 
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  return _respond(result, reqId);
 }
 
 // =====================================================
 // doGet — health check
 // =====================================================
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({ success: true, status: 'ok' }))
-    .setMimeType(ContentService.MimeType.JSON);
+  var reqId = '';
+  if (e && e.parameter && e.parameter._reqId) reqId = e.parameter._reqId;
+  return _respond({ success: true, status: 'ok' }, reqId);
 }
 
 // =====================================================
-// UPLOAD — admin uploads PDF for client to sign
+// Return HTML with window.top.postMessage (CORS bypass)
+// =====================================================
+function _respond(result, reqId) {
+  result._reqId = reqId || '';
+  var json = JSON.stringify(result);
+  var html = '<html><body><script>window.top.postMessage(' + json + ', "*");<\/script></body></html>';
+  return HtmlService.createHtmlOutput(html)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// =====================================================
+// UPLOAD
 // =====================================================
 function handleUpload(data) {
   var pdf = data.pdf;
@@ -83,13 +92,11 @@ function handleUpload(data) {
     success: true,
     fileId: file.getId(),
     fileName: file.getName(),
-    clientName: data.clientName || '',
-    docType: data.docType || '',
   };
 }
 
 // =====================================================
-// FETCH — client loads PDF to display for signing
+// FETCH
 // =====================================================
 function handleFetch(data) {
   var fileId = data.fileId;
@@ -107,7 +114,7 @@ function handleFetch(data) {
 }
 
 // =====================================================
-// SIGNED — client sends back the signed PDF
+// SIGNED
 // =====================================================
 function handleSigned(data) {
   var pdf = data.pdf;
@@ -131,13 +138,12 @@ function handleSigned(data) {
 
   var file = folder.createFile(blob);
 
-  // Email notification
   if (SEND_EMAIL && NOTIFY_EMAIL) {
     try {
       MailApp.sendEmail({
         to: NOTIFY_EMAIL,
         subject: 'מסמך נחתם: ' + docTitle,
-        body: 'מסמך חתום התקבל.\n\nמסמך: ' + docTitle + '\nחותם: ' + clientName + '\nתאריך: ' + timestamp + '\n\nקישור: ' + file.getUrl(),
+        body: 'מסמך: ' + docTitle + '\nחותם: ' + clientName + '\nתאריך: ' + timestamp + '\nקישור: ' + file.getUrl(),
         attachments: [blob],
       });
     } catch (emailErr) {
