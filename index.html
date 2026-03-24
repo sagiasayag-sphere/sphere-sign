@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>חתימה דיגיטלית — ספירה ביטוח ופיננסים</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -644,10 +645,30 @@ function updateActions() {
 // ==========================================
 // BUILD SIGNED PDF
 // ==========================================
+let _cachedHeeboFont = null;
+async function loadHeeboFont() {
+  if (_cachedHeeboFont) return _cachedHeeboFont;
+  const resp = await fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/heebo/Heebo%5Bwght%5D.ttf');
+  if (!resp.ok) throw new Error('Font fetch failed');
+  _cachedHeeboFont = await resp.arrayBuffer();
+  return _cachedHeeboFont;
+}
+
 async function buildSignedPdf() {
   const pdfDoc = await PDFDocument.load(originalPdfBytes);
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // Hebrew font (Heebo) for Hebrew text
+  let heebo;
+  try {
+    pdfDoc.registerFontkit(fontkit);
+    const fontBytes = await loadHeeboFont();
+    heebo = await pdfDoc.embedFont(fontBytes);
+  } catch(e) {
+    console.warn('Hebrew font load failed:', e);
+    heebo = null;
+  }
   
   const page = pdfDoc.addPage([595.28, 841.89]);
   const { width: W, height: H } = page.getSize();
@@ -679,9 +700,11 @@ async function buildSignedPdf() {
     ['Original pages:', String(pdfDoc.getPageCount() - 1)],
     ['Method:', 'Electronic signature via web (canvas)'],
   ];
+  const hasHebrew = (s) => /[\u0590-\u05FF]/.test(s);
   for (const [label, value] of details) {
     page.drawText(label, { x:70, y, size:10, font:fontB, color:navy });
-    page.drawText(value, { x:210, y, size:10, font, color:gray });
+    const valFont = (heebo && hasHebrew(value)) ? heebo : font;
+    page.drawText(value, { x:210, y, size:10, font:valFont, color:gray });
     y -= 22;
   }
 
