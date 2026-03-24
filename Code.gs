@@ -1,148 +1,147 @@
 // =====================================================
-// Sphere Sign — Google Apps Script Backend
-// Webhook for: admin.html (upload) + index.html (fetch, signed)
-// CORS fix: returns HTML with parent.postMessage()
+// Sphere Sign v2 — Google Apps Script Backend
+// Client sends: fetch POST with Content-Type: text/plain
+// Server returns: ContentService JSON
 // =====================================================
 
 // === CONFIGURATION ===
-const CONFIG = {
-  folderId: '',            // Google Drive folder ID for uploaded docs (leave empty = root)
-  signedFolderId: '',      // Google Drive folder ID for signed docs (leave empty = same as folderId)
-  notifyEmail: 'sagi@sphere-ifs.co.il',  // Email to notify on signed doc
-  sendEmailOnSigned: true,               // Send email notification when doc is signed
-};
+var FOLDER_ID = '';          // Google Drive folder ID (empty = root)
+var SIGNED_FOLDER_ID = '';   // Folder for signed docs (empty = same as FOLDER_ID)
+var NOTIFY_EMAIL = 'sagi@sphere-ifs.co.il';
+var SEND_EMAIL = true;
 
 // =====================================================
-// MAIN ENTRY POINT
+// doPost — main entry point
 // =====================================================
 function doPost(e) {
-  let result;
+  var result;
   try {
-    // Parse JSON from request body (sent as text/plain to avoid CORS preflight)
-    const raw = e.postData.contents;
-    const data = JSON.parse(raw);
+    // Try to parse JSON from body (fetch text/plain) or from form field
+    var raw = '';
+    if (e.postData && e.postData.contents) {
+      raw = e.postData.contents;
+    } else if (e.parameter && e.parameter.payload) {
+      raw = e.parameter.payload;
+    }
 
-    switch (data.action) {
-      case 'upload':
-        result = handleUpload(data);
-        break;
-      case 'fetch':
-        result = handleFetch(data);
-        break;
-      case 'signed':
-        result = handleSigned(data);
-        break;
-      default:
-        result = { success: false, error: 'Unknown action: ' + data.action };
+    if (!raw) {
+      result = { success: false, error: 'No data received' };
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var data = JSON.parse(raw);
+    var action = data.action || '';
+
+    if (action === 'upload') {
+      result = handleUpload(data);
+    } else if (action === 'fetch') {
+      result = handleFetch(data);
+    } else if (action === 'signed') {
+      result = handleSigned(data);
+    } else {
+      result = { success: false, error: 'Unknown action: ' + action };
     }
   } catch (err) {
-    result = { success: false, error: err.message || String(err) };
+    result = { success: false, error: String(err) };
   }
 
-  // Return JSON via ContentService (supports CORS with text/plain requests)
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// Fallback for GET requests (testing / health check)
+// =====================================================
+// doGet — health check
+// =====================================================
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({ success: true, status: 'ok' }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
 // =====================================================
-// ACTION: UPLOAD (admin uploads PDF for signing)
+// UPLOAD — admin uploads PDF for client to sign
 // =====================================================
 function handleUpload(data) {
-  const { pdf, filename, clientName, docType } = data;
+  var pdf = data.pdf;
+  var filename = data.filename || 'document.pdf';
   if (!pdf) throw new Error('No PDF data');
 
-  const decoded = Utilities.base64Decode(pdf);
-  const blob = Utilities.newBlob(decoded, 'application/pdf', filename || 'document.pdf');
+  var decoded = Utilities.base64Decode(pdf);
+  var blob = Utilities.newBlob(decoded, 'application/pdf', filename);
 
-  const folder = CONFIG.folderId
-    ? DriveApp.getFolderById(CONFIG.folderId)
-    : DriveApp.getRootFolder();
+  var folder;
+  if (FOLDER_ID) {
+    folder = DriveApp.getFolderById(FOLDER_ID);
+  } else {
+    folder = DriveApp.getRootFolder();
+  }
 
-  const file = folder.createFile(blob);
-
-  // Set sharing to anyone with link can view (so client can fetch it)
+  var file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
   return {
     success: true,
     fileId: file.getId(),
     fileName: file.getName(),
-    clientName: clientName || '',
-    docType: docType || '',
+    clientName: data.clientName || '',
+    docType: data.docType || '',
   };
 }
 
 // =====================================================
-// ACTION: FETCH (client page loads PDF for signing)
+// FETCH — client loads PDF to display for signing
 // =====================================================
 function handleFetch(data) {
-  const { fileId } = data;
+  var fileId = data.fileId;
   if (!fileId) throw new Error('No fileId provided');
 
-  const file = DriveApp.getFileById(fileId);
-  const blob = file.getBlob();
-  const bytes = blob.getBytes();
-  const base64 = Utilities.base64Encode(bytes);
+  var file = DriveApp.getFileById(fileId);
+  var blob = file.getBlob();
+  var base64 = Utilities.base64Encode(blob.getBytes());
 
   return {
     success: true,
     pdf: base64,
     filename: file.getName(),
-    pages: null, // client counts pages after loading
   };
 }
 
 // =====================================================
-// ACTION: SIGNED (client sends back signed PDF)
+// SIGNED — client sends back the signed PDF
 // =====================================================
 function handleSigned(data) {
-  const { pdf, filename, clientName, timestamp, docTitle } = data;
+  var pdf = data.pdf;
+  var docTitle = data.docTitle || 'document';
+  var safeName = data.filename || (docTitle + ' — signed.pdf');
+  var clientName = data.clientName || '';
+  var timestamp = data.timestamp || new Date().toLocaleString('he-IL');
+
   if (!pdf) throw new Error('No signed PDF data');
 
-  const decoded = Utilities.base64Decode(pdf);
-  const safeName = filename || (docTitle || 'document') + ' — signed.pdf';
-  const blob = Utilities.newBlob(decoded, 'application/pdf', safeName);
+  var decoded = Utilities.base64Decode(pdf);
+  var blob = Utilities.newBlob(decoded, 'application/pdf', safeName);
 
-  // Save to Drive
-  const folderId = CONFIG.signedFolderId || CONFIG.folderId;
-  const folder = folderId
-    ? DriveApp.getFolderById(folderId)
-    : DriveApp.getRootFolder();
+  var folderId = SIGNED_FOLDER_ID || FOLDER_ID;
+  var folder;
+  if (folderId) {
+    folder = DriveApp.getFolderById(folderId);
+  } else {
+    folder = DriveApp.getRootFolder();
+  }
 
-  const file = folder.createFile(blob);
+  var file = folder.createFile(blob);
 
-  // Send email notification
-  if (CONFIG.sendEmailOnSigned && CONFIG.notifyEmail) {
+  // Email notification
+  if (SEND_EMAIL && NOTIFY_EMAIL) {
     try {
-      const subject = '✅ מסמך נחתם: ' + (docTitle || safeName);
-      const body = [
-        'מסמך חתום התקבל במערכת.',
-        '',
-        'מסמך: ' + (docTitle || safeName),
-        'חותם: ' + (clientName || 'לא צוין'),
-        'תאריך חתימה: ' + (timestamp || new Date().toLocaleString('he-IL')),
-        '',
-        'הקובץ נשמר ב-Google Drive:',
-        file.getUrl(),
-        '',
-        '— ספירה ביטוח ופיננסים',
-      ].join('\n');
-
       MailApp.sendEmail({
-        to: CONFIG.notifyEmail,
-        subject: subject,
-        body: body,
+        to: NOTIFY_EMAIL,
+        subject: 'מסמך נחתם: ' + docTitle,
+        body: 'מסמך חתום התקבל.\n\nמסמך: ' + docTitle + '\nחותם: ' + clientName + '\nתאריך: ' + timestamp + '\n\nקישור: ' + file.getUrl(),
         attachments: [blob],
       });
     } catch (emailErr) {
-      // Don't fail the whole request if email fails
-      Logger.log('Email error: ' + emailErr.message);
+      Logger.log('Email error: ' + emailErr);
     }
   }
 
