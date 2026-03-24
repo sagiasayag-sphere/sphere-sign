@@ -18,8 +18,8 @@ const CONFIG = {
 function doPost(e) {
   let result;
   try {
-    // Parse payload from hidden iframe form POST
-    const raw = e.parameter.payload || e.postData.contents;
+    // Parse JSON from request body (sent as text/plain to avoid CORS preflight)
+    const raw = e.postData.contents;
     const data = JSON.parse(raw);
 
     switch (data.action) {
@@ -39,17 +39,15 @@ function doPost(e) {
     result = { success: false, error: err.message || String(err) };
   }
 
-  // Return HTML with postMessage (iframe CORS fix)
-  return HtmlService.createHtmlOutput(
-    '<script>parent.postMessage(' + JSON.stringify(result) + ', "*");</script>'
-  );
+  // Return JSON via ContentService (supports CORS with text/plain requests)
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Fallback for GET requests (testing / health check)
 function doGet(e) {
-  return HtmlService.createHtmlOutput(
-    '<script>parent.postMessage({"success":true,"status":"ok"}, "*");</script>'
-  );
+  return ContentService.createTextOutput(JSON.stringify({ success: true, status: 'ok' }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // =====================================================
