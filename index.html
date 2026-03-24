@@ -99,6 +99,43 @@
   .doc-status.err { background: var(--error-bg); color: var(--error); }
   .doc-status .big { font-size: 32px; display: block; margin-bottom: 6px; }
 
+  /* PDF Viewer */
+  .pdf-viewer {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 12px;
+    background: #525659;
+  }
+  .pdf-viewer iframe {
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    border: none;
+    display: block;
+  }
+  .pdf-viewer-label {
+    background: var(--navy);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pdf-viewer-label button {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .pdf-viewer-label button:hover { background: rgba(255,255,255,0.25); }
+
   /* Signature */
   .sig-wrap {
     position: relative;
@@ -285,6 +322,18 @@
     </div>
   </div>
 
+  <!-- PDF Viewer -->
+  <div class="card" id="viewerCard" style="display:none;">
+    <div class="card-label">👁️ צפייה במסמך</div>
+    <div class="pdf-viewer">
+      <div class="pdf-viewer-label">
+        <span id="viewerTitle">מסמך</span>
+        <button onclick="toggleFullscreen()">🔍 הגדל</button>
+      </div>
+      <iframe id="pdfFrame" title="תצוגת מסמך"></iframe>
+    </div>
+  </div>
+
   <!-- Signature -->
   <div class="card" id="sigCard" style="display:none;">
     <div class="card-label">✍️ חתימה</div>
@@ -438,6 +487,13 @@ async function loadPdf() {
     document.getElementById('docStatus').className = 'doc-status ok';
     document.getElementById('docStatus').innerHTML = '<span class="big">📄</span>המסמך נטען — ' + pages + ' עמודים';
     
+    // Show PDF viewer
+    const pdfBlob = new Blob([originalPdfBytes], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    document.getElementById('pdfFrame').src = pdfUrl;
+    document.getElementById('viewerTitle').textContent = DOC_TITLE + ' — ' + pages + ' עמודים';
+    document.getElementById('viewerCard').style.display = '';
+
     // Show signature section
     document.getElementById('sigCard').style.display = '';
     document.getElementById('actionsArea').style.display = '';
@@ -748,6 +804,12 @@ function uint8ToBase64(arr) {
   let bin = '';
   for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
   return btoa(bin);
+}
+
+function toggleFullscreen() {
+  const frame = document.getElementById('pdfFrame');
+  if (frame.requestFullscreen) frame.requestFullscreen();
+  else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
 }
 
 function showGlobal(msg, type) {
