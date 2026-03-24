@@ -538,6 +538,60 @@ let uploadedFile = null;
 let uploadedBase64 = null;
 let generatedLink = '';
 
+// ==========================================
+// POST TO GAS VIA HIDDEN IFRAME (CORS FIX)
+// ==========================================
+function postToGAS(url, data) {
+  return new Promise((resolve, reject) => {
+    const uid = 'gasframe_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+    const iframe = document.createElement('iframe');
+    iframe.name = uid;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = uid;
+    form.style.display = 'none';
+
+    const input = document.createElement('textarea');
+    input.name = 'payload';
+    input.value = JSON.stringify(data);
+    form.appendChild(input);
+    document.body.appendChild(form);
+
+    function onMessage(e) {
+      try { if (e.source !== iframe.contentWindow) return; } catch(ex) {}
+      window.removeEventListener('message', onMessage);
+      clearTimeout(timer);
+      cleanup();
+      let result = e.data;
+      if (typeof result === 'string') {
+        try { result = JSON.parse(result); } catch(ex) {}
+      }
+      resolve(result);
+    }
+    window.addEventListener('message', onMessage);
+
+    const timer = setTimeout(() => {
+      window.removeEventListener('message', onMessage);
+      cleanup();
+      reject(new Error('Request timed out'));
+    }, 30000);
+
+    function cleanup() {
+      setTimeout(() => {
+        try { form.remove(); } catch(e) {}
+        try { iframe.remove(); } catch(e) {}
+      }, 500);
+    }
+
+    form.submit();
+  });
+}
+
 function loadConfig() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -710,18 +764,13 @@ async function generate() {
   const docTitle = document.getElementById('docTitle').value.trim() || uploadedFile.name.replace('.pdf', '');
   
   try {
-    const resp = await fetch(config.webhook, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'upload',
-        pdf: uploadedBase64,
-        filename: uploadedFile.name,
-        clientName: clientName,
-        docType: docType,
-      }),
+    const data = await postToGAS(config.webhook, {
+      action: 'upload',
+      pdf: uploadedBase64,
+      filename: uploadedFile.name,
+      clientName: clientName,
+      docType: docType,
     });
-    
-    const data = await resp.json();
     
     if (!data.success) throw new Error(data.error || 'Upload failed');
     

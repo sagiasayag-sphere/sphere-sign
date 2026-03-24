@@ -350,6 +350,60 @@ let originalPdfBytes = null;
 let sigConfirmed = false;
 let sigTimestamp = '';
 
+// ==========================================
+// POST TO GAS VIA HIDDEN IFRAME (CORS FIX)
+// ==========================================
+function postToGAS(url, data) {
+  return new Promise((resolve, reject) => {
+    const uid = 'gasframe_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+    const iframe = document.createElement('iframe');
+    iframe.name = uid;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = uid;
+    form.style.display = 'none';
+
+    const input = document.createElement('textarea');
+    input.name = 'payload';
+    input.value = JSON.stringify(data);
+    form.appendChild(input);
+    document.body.appendChild(form);
+
+    function onMessage(e) {
+      try { if (e.source !== iframe.contentWindow) return; } catch(ex) {}
+      window.removeEventListener('message', onMessage);
+      clearTimeout(timer);
+      cleanup();
+      let result = e.data;
+      if (typeof result === 'string') {
+        try { result = JSON.parse(result); } catch(ex) {}
+      }
+      resolve(result);
+    }
+    window.addEventListener('message', onMessage);
+
+    const timer = setTimeout(() => {
+      window.removeEventListener('message', onMessage);
+      cleanup();
+      reject(new Error('Request timed out'));
+    }, 30000);
+
+    function cleanup() {
+      setTimeout(() => {
+        try { form.remove(); } catch(e) {}
+        try { iframe.remove(); } catch(e) {}
+      }, 500);
+    }
+
+    form.submit();
+  });
+}
+
 // === INIT ===
 document.getElementById('infoTitle').textContent = DOC_TITLE;
 
@@ -364,14 +418,10 @@ if (!FILE_ID || !WEBHOOK) {
 // ==========================================
 async function loadPdf() {
   try {
-    const resp = await fetch(WEBHOOK, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'fetch',
-        fileId: FILE_ID,
-      }),
+    const data = await postToGAS(WEBHOOK, {
+      action: 'fetch',
+      fileId: FILE_ID,
     });
-    const data = await resp.json();
     
     if (!data.success) throw new Error(data.error || 'Failed to load');
     
@@ -643,18 +693,14 @@ async function sendSigned() {
     const pdfBytes = await buildSignedPdf();
     const b64 = uint8ToBase64(pdfBytes);
     
-    const resp = await fetch(WEBHOOK, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'signed',
-        pdf: b64,
-        filename: DOC_TITLE + ' — signed.pdf',
-        clientName: CLIENT_NAME,
-        timestamp: sigTimestamp,
-        docTitle: DOC_TITLE,
-      }),
+    const data = await postToGAS(WEBHOOK, {
+      action: 'signed',
+      pdf: b64,
+      filename: DOC_TITLE + ' — signed.pdf',
+      clientName: CLIENT_NAME,
+      timestamp: sigTimestamp,
+      docTitle: DOC_TITLE,
     });
-    const data = await resp.json();
     if (!data.success) throw new Error(data.error || 'Send failed');
 
     // Show done state
