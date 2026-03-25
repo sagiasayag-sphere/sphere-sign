@@ -5,294 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>חתימה דיגיטלית — ספירה ביטוח ופיננסים</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   :root {
-    --navy: #0D1B5E;
-    --gold: #E8B829;
-    --bg: #f0f2f7;
-    --white: #fff;
-    --text: #1a1a2e;
-    --text-light: #6b7280;
-    --border: #e2e5ef;
-    --success: #059669;
-    --success-bg: #ecfdf5;
-    --error: #dc2626;
-    --error-bg: #fef2f2;
+    --navy:#0D1B5E; --gold:#E8B829; --bg:#f0f2f7; --white:#fff;
+    --text:#1a1a2e; --text-light:#6b7280; --border:#e2e5ef;
+    --success:#059669; --success-bg:#ecfdf5; --error:#dc2626; --error-bg:#fef2f2;
   }
+  body { font-family:'Heebo',sans-serif; background:var(--bg); color:var(--text); direction:rtl; line-height:1.7; min-height:100vh; -webkit-tap-highlight-color:transparent; }
+  .header { background:var(--navy); padding:14px 20px; text-align:center; box-shadow:0 2px 12px rgba(13,27,94,0.15); }
+  .header h1 { color:var(--gold); font-size:17px; font-weight:700; }
+  .header .sub { color:rgba(255,255,255,0.6); font-size:12px; margin-top:2px; }
+  .container { max-width:600px; margin:0 auto; padding:16px 14px; }
+  .card { background:var(--white); border-radius:10px; box-shadow:0 1px 6px rgba(0,0,0,0.05); padding:20px; margin-bottom:12px; }
+  .card-label { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+  .doc-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:14px; }
+  .doc-row:last-child { border:none; }
+  .doc-row .lbl { color:var(--text-light); }
+  .doc-row .val { font-weight:600; }
+  .doc-status { text-align:center; padding:16px; border-radius:8px; margin-top:12px; }
+  .doc-status.loading { background:#eff6ff; color:#2563eb; }
+  .doc-status.ok { background:var(--success-bg); color:var(--success); }
+  .doc-status.err { background:var(--error-bg); color:var(--error); }
+  .doc-status .big { font-size:32px; display:block; margin-bottom:6px; }
 
-  body {
-    font-family: 'Heebo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    direction: rtl;
-    line-height: 1.7;
-    min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .sig-wrap { position:relative; border:2px solid var(--border); border-radius:8px; background:#fafbfd; overflow:hidden; touch-action:none; }
+  .sig-wrap.active { border-color:var(--navy); }
+  .sig-wrap.locked { border-color:var(--success); background:#f7fdf9; }
+  .sig-wrap canvas { display:block; width:100%; height:150px; cursor:crosshair; }
+  .sig-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#c8cdd8; font-size:15px; pointer-events:none; transition:opacity 0.3s; }
+  .sig-placeholder .hand { font-size:32px; }
 
-  /* Header */
-  .header {
-    background: var(--navy);
-    padding: 14px 20px;
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(13,27,94,0.15);
-  }
-  .header h1 {
-    color: var(--gold);
-    font-size: 17px;
-    font-weight: 700;
-  }
-  .header .sub {
-    color: rgba(255,255,255,0.6);
-    font-size: 12px;
-    margin-top: 2px;
-  }
+  .sig-actions { display:flex; gap:8px; margin-top:10px; }
+  .sig-actions .btn { flex:1; padding:10px; border:none; border-radius:7px; font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+  .sig-actions .btn:disabled { opacity:0.35; cursor:not-allowed; }
+  .btn-clear { background:#f3f4f6; color:var(--text-light); }
+  .btn-confirm { background:var(--navy); color:var(--white); }
 
-  /* Container */
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 16px 14px;
-  }
+  .ts-badge { text-align:center; font-size:13px; color:var(--success); font-weight:600; margin-top:10px; padding:6px 10px; background:var(--success-bg); border-radius:6px; display:none; }
 
-  /* Card */
-  .card {
-    background: var(--white);
-    border-radius: 10px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-  .card-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .consent { display:none; align-items:flex-start; gap:10px; padding:12px; background:#fefce8; border:1px solid #fde68a; border-radius:8px; margin-top:12px; }
+  .consent.show { display:flex; }
+  .consent input { margin-top:3px; width:18px; height:18px; accent-color:var(--navy); flex-shrink:0; }
+  .consent label { font-size:13px; line-height:1.5; }
 
-  /* Doc info */
-  .doc-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 7px 0;
-    border-bottom: 1px solid #f3f4f6;
-    font-size: 14px;
-  }
-  .doc-row:last-child { border: none; }
-  .doc-row .lbl { color: var(--text-light); }
-  .doc-row .val { font-weight: 600; }
+  .main-btn { width:100%; padding:14px; border:none; border-radius:8px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
+  .main-btn:disabled { opacity:0.35; cursor:not-allowed; }
+  .btn-send { background:var(--success); color:var(--white); }
+  .btn-dl { background:var(--white); color:var(--text); border:1px solid var(--border); }
 
-  /* Status indicator */
-  .doc-status {
-    text-align: center;
-    padding: 16px;
-    border-radius: 8px;
-    margin-top: 12px;
-  }
-  .doc-status.loading { background: #eff6ff; color: #2563eb; }
-  .doc-status.ok { background: var(--success-bg); color: var(--success); }
-  .doc-status.err { background: var(--error-bg); color: var(--error); }
-  .doc-status .big { font-size: 32px; display: block; margin-bottom: 6px; }
+  .g-status { text-align:center; padding:10px; border-radius:8px; font-size:14px; margin-bottom:8px; display:none; }
+  .g-status.show { display:block; }
+  .g-status.success { background:var(--success-bg); color:var(--success); }
+  .g-status.error { background:var(--error-bg); color:var(--error); }
+  .g-status.loading { background:#eff6ff; color:#2563eb; }
 
-  /* PDF Viewer */
-  .pdf-viewer {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 12px;
-    background: #525659;
-  }
-  .pdf-viewer iframe {
-    width: 100%;
-    height: 60vh;
-    min-height: 400px;
-    border: none;
-    display: block;
-  }
-  .pdf-viewer-label {
-    background: var(--navy);
-    color: var(--white);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 8px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .pdf-viewer-label button {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: var(--white);
-    font-family: inherit;
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .pdf-viewer-label button:hover { background: rgba(255,255,255,0.25); }
+  .done-card { display:none; text-align:center; padding:32px 20px; }
+  .done-card.show { display:block; }
+  .done-card .check { font-size:56px; }
+  .done-card h2 { color:var(--success); margin:12px 0 8px; font-size:20px; }
+  .done-card p { color:var(--text-light); font-size:14px; }
 
-  /* Signature */
-  .sig-wrap {
-    position: relative;
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    background: #fafbfd;
-    overflow: hidden;
-    touch-action: none;
-  }
-  .sig-wrap.active { border-color: var(--navy); }
-  .sig-wrap.locked {
-    border-color: var(--success);
-    background: #f7fdf9;
-  }
-  .sig-wrap canvas {
-    display: block;
-    width: 100%;
-    height: 150px;
-    cursor: crosshair;
-  }
-  .sig-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #c8cdd8;
-    font-size: 15px;
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .sig-placeholder .hand { font-size: 32px; }
+  .footer { text-align:center; padding:18px 16px; font-size:11px; color:var(--text-light); line-height:1.8; }
+  .footer b { color:var(--navy); }
+  .footer a { color:var(--navy); text-decoration:none; }
 
-  .sig-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .sig-actions .btn {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .sig-actions .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-clear { background: #f3f4f6; color: var(--text-light); }
-  .btn-clear:hover:not(:disabled) { background: #e5e7eb; }
-  .btn-confirm { background: var(--navy); color: var(--white); }
-  .btn-confirm:hover:not(:disabled) { background: #0a1548; }
-
-  .timestamp-badge {
-    text-align: center;
-    font-size: 13px;
-    color: var(--success);
-    font-weight: 600;
-    margin-top: 10px;
-    padding: 6px 10px;
-    background: var(--success-bg);
-    border-radius: 6px;
-    display: none;
-  }
-
-  /* Consent */
-  .consent {
-    display: none;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px;
-    background: #fefce8;
-    border: 1px solid #fde68a;
-    border-radius: 8px;
-    margin-top: 12px;
-  }
-  .consent.show { display: flex; }
-  .consent input {
-    margin-top: 3px;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--navy);
-    flex-shrink: 0;
-  }
-  .consent label { font-size: 13px; line-height: 1.5; }
-
-  /* Main buttons */
-  .main-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  .main-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-send { background: var(--success); color: var(--white); }
-  .btn-send:hover:not(:disabled) { background: #047857; }
-  .btn-download { background: var(--white); color: var(--text); border: 1px solid var(--border); }
-  .btn-download:hover:not(:disabled) { background: var(--bg); }
-
-  .global-status {
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 8px;
-    display: none;
-  }
-  .global-status.show { display: block; }
-  .global-status.success { background: var(--success-bg); color: var(--success); }
-  .global-status.error { background: var(--error-bg); color: var(--error); }
-  .global-status.loading { background: #eff6ff; color: #2563eb; }
-
-  /* Done state */
-  .done-card {
-    display: none;
-    text-align: center;
-    padding: 32px 20px;
-  }
-  .done-card.show { display: block; }
-  .done-card .check { font-size: 56px; }
-  .done-card h2 { color: var(--success); margin: 12px 0 8px; font-size: 20px; }
-  .done-card p { color: var(--text-light); font-size: 14px; }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 18px 16px;
-    font-size: 11px;
-    color: var(--text-light);
-    line-height: 1.8;
-  }
-  .footer b { color: var(--navy); }
-  .footer a { color: var(--navy); text-decoration: none; }
-
-  .spinner {
-    display: inline-block;
-    width: 18px; height: 18px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { display:inline-block; width:18px; height:18px; border:3px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -303,83 +83,44 @@
 </div>
 
 <div class="container">
-
-  <!-- Doc Info -->
   <div class="card" id="docCard">
     <div class="card-label">📄 פרטי המסמך</div>
-    <div class="doc-row">
-      <span class="lbl">מסמך</span>
-      <span class="val" id="infoTitle">טוען...</span>
-    </div>
-    <div class="doc-row">
-      <span class="lbl">עמודים</span>
-      <span class="val" id="infoPages">—</span>
-    </div>
+    <div class="doc-row"><span class="lbl">מסמך</span><span class="val" id="infoTitle">טוען...</span></div>
+    <div class="doc-row"><span class="lbl">עמודים</span><span class="val" id="infoPages">—</span></div>
     <div id="docStatusArea">
-      <div class="doc-status loading" id="docStatus">
-        <span class="big">⏳</span>
-        טוען מסמך...
-      </div>
+      <div class="doc-status loading" id="docStatus"><span class="big">⏳</span>טוען מסמך...</div>
     </div>
   </div>
 
-  <!-- PDF Viewer -->
-  <div class="card" id="viewerCard" style="display:none;">
-    <div class="card-label">👁️ צפייה במסמך</div>
-    <div class="pdf-viewer">
-      <div class="pdf-viewer-label">
-        <span id="viewerTitle">מסמך</span>
-        <button onclick="toggleFullscreen()">🔍 הגדל</button>
-      </div>
-      <iframe id="pdfFrame" title="תצוגת מסמך"></iframe>
-    </div>
-  </div>
-
-  <!-- Signature -->
   <div class="card" id="sigCard" style="display:none;">
     <div class="card-label">✍️ חתימה</div>
     <div class="sig-wrap" id="sigWrap">
       <canvas id="sigCanvas"></canvas>
-      <div class="sig-placeholder" id="sigPH">
-        <span class="hand">☝️</span>
-        חתום כאן עם האצבע
-      </div>
+      <div class="sig-placeholder" id="sigPH"><span class="hand">☝️</span>חתום כאן עם האצבע</div>
     </div>
     <div class="sig-actions">
       <button class="btn btn-clear" id="clearBtn" onclick="clearSig()">🗑️ נקה</button>
       <button class="btn btn-confirm" id="confirmBtn" disabled onclick="confirmSig()">✅ אשר חתימה</button>
     </div>
-    <div class="timestamp-badge" id="tsBadge"></div>
+    <div class="ts-badge" id="tsBadge"></div>
     <div class="consent" id="consent">
       <input type="checkbox" id="consentCheck" onchange="updateActions()">
-      <label for="consentCheck">
-        אני מאשר/ת כי קראתי את המסמך, הבנתי את תוכנו, ואני חותם/ת עליו מרצוני החופשי.
-      </label>
+      <label for="consentCheck">אני מאשר/ת כי קראתי את המסמך, הבנתי את תוכנו, ואני חותם/ת עליו מרצוני החופשי.</label>
     </div>
   </div>
 
-  <!-- Actions -->
   <div id="actionsArea" style="display:none;">
-    <button class="main-btn btn-send" id="sendBtn" disabled onclick="sendSigned()">
-      📧 שלח מסמך חתום לסוכן
-    </button>
-    <button class="main-btn btn-download" id="dlBtn" disabled onclick="downloadSigned()">
-      📥 הורד PDF חתום
-    </button>
+    <button class="main-btn btn-send" id="sendBtn" disabled onclick="sendSigned()">📧 שלח מסמך חתום לסוכן</button>
+    <button class="main-btn btn-dl" id="dlBtn" disabled onclick="downloadSigned()">📥 הורד PDF חתום</button>
   </div>
 
-  <div class="global-status" id="gStatus"></div>
+  <div class="g-status" id="gStatus"></div>
 
-  <!-- Done -->
   <div class="card done-card" id="doneCard">
     <div class="check">✅</div>
     <h2>המסמך נחתם ונשלח בהצלחה</h2>
     <p>העתק חתום נשלח לסוכנות ספירה ביטוח ופיננסים.<br>תודה!</p>
-    <button class="main-btn btn-download" style="margin-top:16px;" onclick="downloadSigned()">
-      📥 הורד עותק חתום
-    </button>
   </div>
-
 </div>
 
 <div class="footer">
@@ -388,125 +129,79 @@
   <a href="tel:0559137893">055-9137893</a> | <a href="mailto:sagi@sphere-ifs.co.il">sagi@sphere-ifs.co.il</a>
 </div>
 
+<iframe id="gasFrame" name="gasFrame" style="display:none;"></iframe>
+
 <script>
-const { PDFDocument, rgb, StandardFonts } = PDFLib;
+var PDFLib_PDFDocument = PDFLib.PDFDocument;
+var PDFLib_rgb = PDFLib.rgb;
+var PDFLib_StandardFonts = PDFLib.StandardFonts;
 
 // === PARAMS ===
-const P = new URLSearchParams(location.search);
-const FILE_ID = P.get('id') || '';
-const DOC_TITLE = P.get('title') || 'מסמך לחתימה';
-const CLIENT_NAME = P.get('name') || '';
-const WEBHOOK = P.get('webhook') || '';
+var P = new URLSearchParams(location.search);
+var FILE_ID = P.get('id') || '';
+var DOC_TITLE = P.get('title') || 'מסמך לחתימה';
+var CLIENT_NAME = P.get('name') || '';
+var WEBHOOK = P.get('webhook') || '';
 
-// === STATE ===
-let originalPdfBytes = null;
-let sigConfirmed = false;
-let sigTimestamp = '';
-
-// ==========================================
-// POST TO GAS VIA FORM + IFRAME (bypasses CORS entirely)
-// GAS returns HtmlService with window.top.postMessage
-// ==========================================
-let _gasReqCounter = 0;
-function postToGAS(url, data) {
-  return new Promise((resolve, reject) => {
-    const reqId = '_gas_' + Date.now() + '_' + (++_gasReqCounter);
-    data._reqId = reqId;
-
-    const iframeName = 'gf_' + reqId;
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = url;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    const field = document.createElement('textarea');
-    field.name = 'payload';
-    field.value = JSON.stringify(data);
-    form.appendChild(field);
-    document.body.appendChild(form);
-
-    function onMsg(e) {
-      let d = e.data;
-      if (typeof d === 'string') { try { d = JSON.parse(d); } catch(x) { return; } }
-      if (!d || d._reqId !== reqId) return;
-      window.removeEventListener('message', onMsg);
-      clearTimeout(timer);
-      cleanup();
-      delete d._reqId;
-      resolve(d);
-    }
-    window.addEventListener('message', onMsg);
-
-    const timer = setTimeout(() => {
-      window.removeEventListener('message', onMsg);
-      cleanup();
-      reject(new Error('Request timed out'));
-    }, 120000);
-
-    function cleanup() {
-      setTimeout(() => { try { form.remove(); iframe.remove(); } catch(x){} }, 1000);
-    }
-
-    form.submit();
-  });
-}
+var originalPdfBytes = null;
+var sigConfirmed = false;
+var sigTimestamp = '';
+var pendingCallback = null;
 
 // === INIT ===
 document.getElementById('infoTitle').textContent = DOC_TITLE;
-
 if (!FILE_ID || !WEBHOOK) {
   showDocError('קישור לא תקין. פנה לסוכן לקבלת קישור חדש.');
 } else {
   loadPdf();
 }
 
-// ==========================================
-// PDF LOADING (via Apps Script proxy)
-// ==========================================
-async function loadPdf() {
-  try {
-    const data = await postToGAS(WEBHOOK, {
-      action: 'fetch',
-      fileId: FILE_ID,
-    });
-    
-    if (!data.success) throw new Error(data.error || 'Failed to load');
-    
-    // Decode base64
-    const raw = atob(data.pdf);
-    originalPdfBytes = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) originalPdfBytes[i] = raw.charCodeAt(i);
-    
-    // Validate
-    const doc = await PDFDocument.load(originalPdfBytes);
-    const pages = doc.getPageCount();
-    
-    document.getElementById('infoPages').textContent = pages;
-    document.getElementById('docStatus').className = 'doc-status ok';
-    document.getElementById('docStatus').innerHTML = '<span class="big">📄</span>המסמך נטען — ' + pages + ' עמודים';
-    
-    // Show PDF viewer
-    const pdfBlob = new Blob([originalPdfBytes], { type: 'application/pdf' });
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    document.getElementById('pdfFrame').src = pdfUrl;
-    document.getElementById('viewerTitle').textContent = DOC_TITLE + ' — ' + pages + ' עמודים';
-    document.getElementById('viewerCard').style.display = '';
+// === GAS COMMUNICATION ===
+window.addEventListener('message', function(event) {
+  var data;
+  try { data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data; } catch(e) { return; }
+  if (pendingCallback) { var cb = pendingCallback; pendingCallback = null; cb(data); }
+});
 
-    // Show signature section
-    document.getElementById('sigCard').style.display = '';
-    document.getElementById('actionsArea').style.display = '';
-    initCanvas();
-    
-  } catch(err) {
-    console.error(err);
-    showDocError('שגיאה בטעינת המסמך. נסה שוב או פנה לסוכן.');
-  }
+function sendToGAS(payload, callback) {
+  pendingCallback = callback;
+  var jsonStr = JSON.stringify(payload);
+  var iframe = document.getElementById('gasFrame');
+  var html = '<!DOCTYPE html><html><body>'
+    + '<form id="f" method="POST" action="' + WEBHOOK + '">'
+    + '<textarea name="payload" style="display:none">' + jsonStr.replace(/</g, '\\u003c').replace(/>/g, '\\u003e') + '</textarea>'
+    + '</form>'
+    + '<script>document.getElementById("f").submit();<\/script>'
+    + '</body></html>';
+  iframe.srcdoc = html;
+  setTimeout(function() { if (pendingCallback) { pendingCallback = null; callback({ success:false, error:'Timeout' }); } }, 30000);
+}
+
+// === PDF LOADING ===
+function loadPdf() {
+  sendToGAS({ action: 'fetch', fileId: FILE_ID }, function(resp) {
+    if (!resp || !resp.success) {
+      showDocError('שגיאה בטעינת המסמך. נסה שוב או פנה לסוכן.');
+      return;
+    }
+    try {
+      var raw = atob(resp.pdf);
+      originalPdfBytes = new Uint8Array(raw.length);
+      for (var i = 0; i < raw.length; i++) originalPdfBytes[i] = raw.charCodeAt(i);
+
+      PDFLib_PDFDocument.load(originalPdfBytes).then(function(doc) {
+        var pages = doc.getPageCount();
+        document.getElementById('infoPages').textContent = pages;
+        document.getElementById('docStatus').className = 'doc-status ok';
+        document.getElementById('docStatus').innerHTML = '<span class="big">📄</span>המסמך נטען — ' + pages + ' עמודים';
+        document.getElementById('sigCard').style.display = '';
+        document.getElementById('actionsArea').style.display = '';
+        initCanvas();
+      });
+    } catch(err) {
+      showDocError('שגיאה בקריאת המסמך.');
+    }
+  });
 }
 
 function showDocError(msg) {
@@ -514,338 +209,160 @@ function showDocError(msg) {
   document.getElementById('docStatus').innerHTML = '<span class="big">❌</span>' + msg;
 }
 
-// ==========================================
-// SIGNATURE CANVAS
-// ==========================================
-let canvas, ctx;
-let drawing = false;
-let hasSigned = false;
-let paths = [];
-let curPath = [];
+// === SIGNATURE CANVAS ===
+var canvas, ctx, drawing = false, hasSigned = false, paths = [], curPath = [];
 
 function initCanvas() {
   canvas = document.getElementById('sigCanvas');
   ctx = canvas.getContext('2d');
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
-  
   canvas.addEventListener('mousedown', startDraw);
   canvas.addEventListener('mousemove', draw);
   canvas.addEventListener('mouseup', stopDraw);
   canvas.addEventListener('mouseleave', stopDraw);
-  canvas.addEventListener('touchstart', startDraw, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stopDraw, { passive: false });
+  canvas.addEventListener('touchstart', startDraw, { passive:false });
+  canvas.addEventListener('touchmove', draw, { passive:false });
+  canvas.addEventListener('touchend', stopDraw, { passive:false });
 }
 
 function resizeCanvas() {
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
+  var rect = canvas.parentElement.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
   canvas.width = rect.width * dpr;
   canvas.height = 150 * dpr;
   canvas.style.height = '150px';
   ctx.scale(dpr, dpr);
-  setupCtx();
-  redraw();
+  setupCtx(); redraw();
 }
-
-function setupCtx() {
-  ctx.strokeStyle = '#0D1B5E';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-}
-
+function setupCtx() { ctx.strokeStyle = '#0D1B5E'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
 function redraw() {
-  const dpr = window.devicePixelRatio || 1;
+  var dpr = window.devicePixelRatio || 1;
   ctx.clearRect(0, 0, canvas.width/dpr, canvas.height/dpr);
   setupCtx();
-  for (const p of paths) {
-    if (p.length < 2) continue;
-    ctx.beginPath();
-    ctx.moveTo(p[0].x, p[0].y);
-    for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
+  for (var p = 0; p < paths.length; p++) {
+    if (paths[p].length < 2) continue;
+    ctx.beginPath(); ctx.moveTo(paths[p][0].x, paths[p][0].y);
+    for (var i = 1; i < paths[p].length; i++) ctx.lineTo(paths[p][i].x, paths[p][i].y);
     ctx.stroke();
   }
 }
-
-function getPos(e) {
-  const r = canvas.getBoundingClientRect();
-  const t = e.touches ? e.touches[0] : e;
-  return { x: t.clientX - r.left, y: t.clientY - r.top };
-}
-
-function startDraw(e) {
-  if (sigConfirmed) return;
-  e.preventDefault();
-  drawing = true;
-  curPath = [getPos(e)];
-  ctx.beginPath();
-  ctx.moveTo(curPath[0].x, curPath[0].y);
-  document.getElementById('sigWrap').classList.add('active');
-  if (!hasSigned) {
-    hasSigned = true;
-    document.getElementById('sigPH').style.opacity = '0';
-    document.getElementById('confirmBtn').disabled = false;
-  }
-}
-
-function draw(e) {
-  if (!drawing || sigConfirmed) return;
-  e.preventDefault();
-  const pos = getPos(e);
-  curPath.push(pos);
-  ctx.lineTo(pos.x, pos.y);
-  ctx.stroke();
-}
-
-function stopDraw(e) {
-  if (!drawing) return;
-  if (e) e.preventDefault();
-  drawing = false;
-  if (curPath.length) paths.push([...curPath]);
-  curPath = [];
-  document.getElementById('sigWrap').classList.remove('active');
-}
-
-function clearSig() {
-  if (sigConfirmed) return;
-  paths = []; curPath = [];
-  const dpr = window.devicePixelRatio || 1;
-  ctx.clearRect(0, 0, canvas.width/dpr, canvas.height/dpr);
-  hasSigned = false;
-  document.getElementById('sigPH').style.opacity = '1';
-  document.getElementById('confirmBtn').disabled = true;
-}
+function getPos(e) { var r = canvas.getBoundingClientRect(); var t = e.touches ? e.touches[0] : e; return { x: t.clientX - r.left, y: t.clientY - r.top }; }
+function startDraw(e) { if (sigConfirmed) return; e.preventDefault(); drawing = true; curPath = [getPos(e)]; ctx.beginPath(); ctx.moveTo(curPath[0].x, curPath[0].y); document.getElementById('sigWrap').classList.add('active'); if (!hasSigned) { hasSigned = true; document.getElementById('sigPH').style.opacity = '0'; document.getElementById('confirmBtn').disabled = false; } }
+function draw(e) { if (!drawing || sigConfirmed) return; e.preventDefault(); var pos = getPos(e); curPath.push(pos); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
+function stopDraw(e) { if (!drawing) return; if (e) e.preventDefault(); drawing = false; if (curPath.length) paths.push(curPath.slice()); curPath = []; document.getElementById('sigWrap').classList.remove('active'); }
+function clearSig() { if (sigConfirmed) return; paths = []; curPath = []; var dpr = window.devicePixelRatio||1; ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr); hasSigned = false; document.getElementById('sigPH').style.opacity = '1'; document.getElementById('confirmBtn').disabled = true; }
 
 function confirmSig() {
   if (!hasSigned) return;
   sigConfirmed = true;
-  const now = new Date();
-  sigTimestamp = now.toLocaleString('he-IL', {
-    year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', second:'2-digit'
-  });
-  
+  var now = new Date();
+  sigTimestamp = now.toLocaleString('he-IL', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
   document.getElementById('sigWrap').classList.add('locked');
   document.getElementById('confirmBtn').disabled = true;
   document.getElementById('clearBtn').disabled = true;
-  
-  const badge = document.getElementById('tsBadge');
+  var badge = document.getElementById('tsBadge');
   badge.textContent = '✅ חתימה אושרה — ' + sigTimestamp;
   badge.style.display = 'block';
-  
   document.getElementById('consent').classList.add('show');
   updateActions();
 }
 
 function updateActions() {
-  const ok = sigConfirmed && document.getElementById('consentCheck').checked;
+  var ok = sigConfirmed && document.getElementById('consentCheck').checked;
   document.getElementById('sendBtn').disabled = !ok;
   document.getElementById('dlBtn').disabled = !ok;
 }
 
-// ==========================================
-// BUILD SIGNED PDF
-// ==========================================
-let _cachedHeeboFont = null;
-async function loadHeeboFont() {
-  if (_cachedHeeboFont) return _cachedHeeboFont;
-  const resp = await fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/heebo/Heebo%5Bwght%5D.ttf');
-  if (!resp.ok) throw new Error('Font fetch failed');
-  _cachedHeeboFont = await resp.arrayBuffer();
-  return _cachedHeeboFont;
-}
-
+// === BUILD SIGNED PDF ===
 async function buildSignedPdf() {
-  const pdfDoc = await PDFDocument.load(originalPdfBytes);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  var pdfDoc = await PDFLib_PDFDocument.load(originalPdfBytes);
+  var font = await pdfDoc.embedFont(PDFLib_StandardFonts.Helvetica);
+  var fontB = await pdfDoc.embedFont(PDFLib_StandardFonts.HelveticaBold);
+  var page = pdfDoc.addPage([595.28, 841.89]);
+  var W = page.getSize().width, H = page.getSize().height;
+  var navy = PDFLib_rgb(13/255,27/255,94/255);
+  var gold = PDFLib_rgb(232/255,184/255,41/255);
+  var gray = PDFLib_rgb(0.4,0.4,0.4);
+  var lgray = PDFLib_rgb(0.85,0.85,0.85);
+  var white = PDFLib_rgb(1,1,1);
 
-  // Hebrew font (Heebo) for Hebrew text
-  let heebo;
-  try {
-    pdfDoc.registerFontkit(fontkit);
-    const fontBytes = await loadHeeboFont();
-    heebo = await pdfDoc.embedFont(fontBytes);
-  } catch(e) {
-    console.warn('Hebrew font load failed:', e);
-    heebo = null;
-  }
-  
-  const page = pdfDoc.addPage([595.28, 841.89]);
-  const { width: W, height: H } = page.getSize();
-  const navy = rgb(13/255,27/255,94/255);
-  const gold = rgb(232/255,184/255,41/255);
-  const gray = rgb(0.4,0.4,0.4);
-  const lgray = rgb(0.85,0.85,0.85);
-  const white = rgb(1,1,1);
+  function ctr(t,y,s,f,c) { var w=f.widthOfTextAtSize(t,s); page.drawText(t,{x:(W-w)/2,y:y,size:s,font:f,color:c}); }
 
-  // -- Top gold bar
-  page.drawRectangle({ x:0, y:H-6, width:W, height:6, color:gold });
+  page.drawRectangle({x:0,y:H-6,width:W,height:6,color:gold});
+  var y=H-50;
+  ctr('DIGITAL SIGNATURE CONFIRMATION',y,18,fontB,navy); y-=22;
+  ctr('Sphere Insurance & Finance',y,11,font,gray); y-=18;
+  page.drawLine({start:{x:50,y:y},end:{x:W-50,y:y},thickness:1.5,color:gold}); y-=30;
 
-  // -- Title
-  let y = H - 50;
-  center('DIGITAL SIGNATURE CONFIRMATION', y, 18, fontB, navy);
-  y -= 22;
-  center('Sphere Insurance & Finance', y, 11, font, gray);
+  var det=[['Document:',DOC_TITLE],['Signed by:',CLIENT_NAME||'—'],['Date & Time:',sigTimestamp],['Original pages:',String(pdfDoc.getPageCount()-1)],['Method:','Electronic signature via web']];
+  for(var d=0;d<det.length;d++){page.drawText(det[d][0],{x:70,y:y,size:10,font:fontB,color:navy});page.drawText(det[d][1],{x:210,y:y,size:10,font:font,color:gray});y-=22;}
 
-  // -- Separator
-  y -= 18;
-  page.drawLine({ start:{x:50,y}, end:{x:W-50,y}, thickness:1.5, color:gold });
+  y-=15;
+  page.drawText('Signature:',{x:70,y:y,size:12,font:fontB,color:navy}); y-=12;
+  var sigData=canvas.toDataURL('image/png');
+  var sigBytes=Uint8Array.from(atob(sigData.split(',')[1]),function(c){return c.charCodeAt(0);});
+  var sigImg=await pdfDoc.embedPng(sigBytes);
+  var sW=280,sH=90,sX=(W-sW)/2;
+  page.drawRectangle({x:sX-6,y:y-sH-6,width:sW+12,height:sH+12,borderColor:lgray,borderWidth:1,color:PDFLib_rgb(0.98,0.98,0.98)});
+  page.drawImage(sigImg,{x:sX,y:y-sH,width:sW,height:sH}); y-=sH+35;
 
-  // -- Details
-  y -= 30;
-  const details = [
-    ['Document:', DOC_TITLE],
-    ['Signed by:', CLIENT_NAME || '—'],
-    ['Date & Time:', sigTimestamp],
-    ['Original pages:', String(pdfDoc.getPageCount() - 1)],
-    ['Method:', 'Electronic signature via web (canvas)'],
-  ];
-  const hasHebrew = (s) => /[\u0590-\u05FF]/.test(s);
-  for (const [label, value] of details) {
-    page.drawText(label, { x:70, y, size:10, font:fontB, color:navy });
-    const valFont = (heebo && hasHebrew(value)) ? heebo : font;
-    page.drawText(value, { x:210, y, size:10, font:valFont, color:gray });
-    y -= 22;
-  }
+  page.drawLine({start:{x:50,y:y},end:{x:W-50,y:y},thickness:0.5,color:lgray}); y-=18;
+  var disc=['This document was digitally signed via Sphere Insurance & Finance.','The signer confirmed reading the document and signing voluntarily.','This constitutes a valid electronic signature under the','Electronic Signature Law, 5761-2001 (Israel).','','Sphere Insurance & Finance is not a party to this agreement.','This document does not constitute legal advice.'];
+  for(var i=0;i<disc.length;i++){if(!disc[i]){y-=8;continue;}ctr(disc[i],y,8.5,font,gray);y-=14;}
 
-  // -- Signature image
-  y -= 15;
-  page.drawText('Signature:', { x:70, y, size:12, font:fontB, color:navy });
-  y -= 12;
-
-  const sigData = canvas.toDataURL('image/png');
-  const sigBytes = Uint8Array.from(atob(sigData.split(',')[1]), c=>c.charCodeAt(0));
-  const sigImg = await pdfDoc.embedPng(sigBytes);
-  
-  const sW = 280, sH = 90, sX = (W-sW)/2;
-  page.drawRectangle({ x:sX-6, y:y-sH-6, width:sW+12, height:sH+12,
-    borderColor:lgray, borderWidth:1, color:rgb(0.98,0.98,0.98) });
-  page.drawImage(sigImg, { x:sX, y:y-sH, width:sW, height:sH });
-
-  y -= sH + 35;
-
-  // -- Disclaimers
-  page.drawLine({ start:{x:50,y}, end:{x:W-50,y}, thickness:0.5, color:lgray });
-  y -= 18;
-
-  const disc = [
-    'This document was digitally signed via Sphere Insurance & Finance.',
-    'The signer confirmed reading the document and signing voluntarily.',
-    'This constitutes a valid electronic signature under the',
-    'Electronic Signature Law, 5761-2001 (Israel).',
-    '',
-    'Sphere Insurance & Finance is not a party to this agreement',
-    'and bears no responsibility for its content.',
-    'This document does not constitute legal advice.',
-    'The signer may revoke their signature in accordance with applicable law.',
-  ];
-  for (const line of disc) {
-    if (!line) { y -= 8; continue; }
-    center(line, y, 8.5, font, gray);
-    y -= 14;
-  }
-
-  // -- Footer
-  page.drawRectangle({ x:0, y:0, width:W, height:32, color:navy });
-  page.drawRectangle({ x:0, y:32, width:W, height:2, color:gold });
-  const ft = 'Sphere Insurance & Finance | Sagi Asayag | L-00108082 | 055-9137893 | sagi@sphere-ifs.co.il';
-  center(ft, 12, 7.5, font, white);
+  page.drawRectangle({x:0,y:0,width:W,height:32,color:navy});
+  page.drawRectangle({x:0,y:32,width:W,height:2,color:gold});
+  ctr('Sphere Insurance & Finance | Sagi Asayag | L-00108082 | 055-9137893 | sagi@sphere-ifs.co.il',12,7.5,font,white);
 
   return await pdfDoc.save();
-
-  function center(text, yp, size, f, color) {
-    const tw = f.widthOfTextAtSize(text, size);
-    page.drawText(text, { x:(W-tw)/2, y:yp, size, font:f, color });
-  }
 }
 
-// ==========================================
-// SEND
-// ==========================================
+// === SEND ===
 async function sendSigned() {
-  const btn = document.getElementById('sendBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> שולח...';
-  showGlobal('בונה PDF חתום ושולח...', 'loading');
-
+  var btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> שולח...';
+  showGlobal('בונה PDF חתום ושולח...','loading');
   try {
-    const pdfBytes = await buildSignedPdf();
-    const b64 = uint8ToBase64(pdfBytes);
-    
-    const data = await postToGAS(WEBHOOK, {
-      action: 'signed',
-      pdf: b64,
-      filename: DOC_TITLE + ' — signed.pdf',
-      clientName: CLIENT_NAME,
-      timestamp: sigTimestamp,
-      docTitle: DOC_TITLE,
+    var pdfBytes = await buildSignedPdf();
+    var b64 = uint8ToBase64(pdfBytes);
+    sendToGAS({
+      action:'signed', pdf:b64,
+      filename: DOC_TITLE+' — signed.pdf',
+      clientName:CLIENT_NAME, timestamp:sigTimestamp, docTitle:DOC_TITLE
+    }, function(resp) {
+      if (resp && resp.success) {
+        document.getElementById('sigCard').style.display='none';
+        document.getElementById('actionsArea').style.display='none';
+        document.getElementById('gStatus').className='g-status';
+        document.getElementById('doneCard').classList.add('show');
+      } else {
+        showGlobal('שגיאה בשליחה. נסה להוריד את ה-PDF.','error');
+        btn.disabled=false; btn.innerHTML='📧 שלח מסמך חתום לסוכן';
+      }
     });
-    if (!data.success) throw new Error(data.error || 'Send failed');
-
-    // Show done state
-    document.getElementById('viewerCard').style.display = 'none';
-    document.getElementById('sigCard').style.display = 'none';
-    document.getElementById('actionsArea').style.display = 'none';
-    document.getElementById('gStatus').className = 'global-status';
-    document.getElementById('doneCard').classList.add('show');
-    
   } catch(err) {
-    console.error('sendSigned error:', err);
-    const detail = err.message || String(err);
-    showGlobal('שגיאה בשליחה: ' + detail, 'error');
-    btn.disabled = false;
-    btn.innerHTML = '📧 שלח מסמך חתום לסוכן';
+    showGlobal('שגיאה: '+err.message,'error');
+    btn.disabled=false; btn.innerHTML='📧 שלח מסמך חתום לסוכן';
   }
 }
 
 async function downloadSigned() {
-  const btn = document.getElementById('dlBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ מכין...';
-
+  var btn = document.getElementById('dlBtn');
+  btn.disabled=true; btn.textContent='⏳ מכין...';
   try {
-    const pdfBytes = await buildSignedPdf();
-    const blob = new Blob([pdfBytes], { type:'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = DOC_TITLE + ' — signed.pdf';
-    a.click();
+    var pdfBytes = await buildSignedPdf();
+    var blob = new Blob([pdfBytes],{type:'application/pdf'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=DOC_TITLE+' — signed.pdf'; a.click();
     URL.revokeObjectURL(url);
-    showGlobal('✅ ה-PDF הורד', 'success');
-  } catch(err) {
-    showGlobal('שגיאה: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '📥 הורד PDF חתום';
-    updateActions();
-  }
+    showGlobal('✅ ה-PDF הורד','success');
+  } catch(err) { showGlobal('שגיאה: '+err.message,'error'); }
+  finally { btn.disabled=false; btn.textContent='📥 הורד PDF חתום'; updateActions(); }
 }
 
-// ==========================================
-// HELPERS
-// ==========================================
-function uint8ToBase64(arr) {
-  let bin = '';
-  for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
-  return btoa(bin);
-}
-
-function toggleFullscreen() {
-  const frame = document.getElementById('pdfFrame');
-  if (frame.requestFullscreen) frame.requestFullscreen();
-  else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
-}
-
-function showGlobal(msg, type) {
-  const el = document.getElementById('gStatus');
-  el.textContent = msg;
-  el.className = 'global-status show ' + type;
-  if (type !== 'loading') setTimeout(() => { el.className = 'global-status'; }, 5000);
-}
+function uint8ToBase64(a){var b='';for(var i=0;i<a.length;i++)b+=String.fromCharCode(a[i]);return btoa(b);}
+function showGlobal(m,t){var e=document.getElementById('gStatus');e.textContent=m;e.className='g-status show '+t;if(t!=='loading')setTimeout(function(){e.className='g-status';},5000);}
 </script>
 </body>
 </html>
